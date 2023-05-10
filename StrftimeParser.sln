@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrftimeParser", "StrftimeParser\StrftimeParser.csproj", "{E075A66F-5904-4767-85C4-9856FD9434FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrftimeParserTest", "test\StrftimeParserTest\StrftimeParserTest.csproj", "{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E075A66F-5904-4767-85C4-9856FD9434FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E075A66F-5904-4767-85C4-9856FD9434FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E075A66F-5904-4767-85C4-9856FD9434FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E075A66F-5904-4767-85C4-9856FD9434FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
