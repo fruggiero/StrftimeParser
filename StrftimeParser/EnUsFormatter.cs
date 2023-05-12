@@ -2,7 +2,7 @@
 
 namespace StrftimeParser
 {
-	public class EnUsFormatter : Formatter
+	internal class EnUsFormatter : Formatter
     {
     	public override string ConsumeAbbreviatedDayOfWeek(ref string input, ref int inputIndex)
     	{
@@ -22,6 +22,21 @@ namespace StrftimeParser
 		        "fri" => DayOfWeek.Friday,
 		        "sat" => DayOfWeek.Saturday,
 		        "sun" => DayOfWeek.Sunday,
+		        _ => throw new ArgumentException()
+	        };
+        }
+
+        public override DayOfWeek ParseDayOfWeekFull(string input)
+        {
+	        return input.ToLower() switch
+	        {
+		        "monday" => DayOfWeek.Monday,
+		        "tuesday" => DayOfWeek.Tuesday,
+		        "wednesday" => DayOfWeek.Wednesday,
+		        "thursday" => DayOfWeek.Thursday,
+		        "friday" => DayOfWeek.Friday,
+		        "saturday" => DayOfWeek.Saturday,
+		        "sunday" => DayOfWeek.Sunday,
 		        _ => throw new ArgumentException()
 	        };
         }
@@ -49,10 +64,9 @@ namespace StrftimeParser
     				inputIndex += "Thursday".Length;
     			}
     			else
-    			{
-    				//TODO: throw exception
-    				throw new Exception();
-    			}
+                {
+	                throw new FormatException("Unrecognized day of week format for this locale");
+                }
     		}
     		else if (input[inputIndex] == 'w' || input[inputIndex] == 'W')
     		{
@@ -78,14 +92,12 @@ namespace StrftimeParser
     			}
     			else
     			{
-    				//TODO: throw exception
-    				throw new Exception();
+	                throw new FormatException("Unrecognized day of week format for this locale");
     			}
     		}
     		else
     		{
-    			//TODO: throw exception
-    			throw new Exception();
+	            throw new FormatException("Unrecognized day of week format for this locale");
     		}
     
     		return fullWeekDay;
