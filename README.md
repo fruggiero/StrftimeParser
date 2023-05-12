@@ -11,7 +11,7 @@ The project provides a main class called `Strftime` that exposes a static method
 
 To use StrftimeParser in your .NET project, follow these simple steps:
 
-1. Add the NuGet package StrftimeParser to your C# project.
+1. Add the NuGet package StrftimeParser to your .NET project.
 
 2. Import the StrftimeParser namespace in your code file.
 
