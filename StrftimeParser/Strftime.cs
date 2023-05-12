@@ -6,7 +6,7 @@ namespace StrftimeParser
 {
     public static class Strftime
     {
-        public static DateTime ToDateTime(string input, string format)
+        public static DateTime Parse(string input, string format)
         {
             bool setDate;
             string abbrWeekDay = null, fullWeekDay = null;

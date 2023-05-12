@@ -29,7 +29,7 @@ namespace StrftimeParserTest
             // Arrange
 
             // Act
-            Action act = () => Strftime.ToDateTime(input, format);
+            Action act = () => Strftime.Parse(input, format);
             
             // Assert
             act.Should().Throw<FormatException>();
@@ -41,7 +41,7 @@ namespace StrftimeParserTest
         public void ShouldThrow_WhenIncoherentDayOfMonth(string input, string format)
         {
             // Act
-            Action act = () => _ = Strftime.ToDateTime(input, format);
+            Action act = () => _ = Strftime.Parse(input, format);
             
             // Assert
             act.Should().Throw<FormatException>();
@@ -65,7 +65,7 @@ namespace StrftimeParserTest
             }
             
             // Act
-            var res = Strftime.ToDateTime(input, format);
+            var res = Strftime.Parse(input, format);
             
             // Assert
             res.Day.Should().Be(now.Day);
@@ -80,7 +80,7 @@ namespace StrftimeParserTest
             // arrange
 
             // act
-            Action act = () => _ = Strftime.ToDateTime(input, format);
+            Action act = () => _ = Strftime.Parse(input, format);
         
             // assert
             act.Should().ThrowExactly<FormatException>();
@@ -105,7 +105,7 @@ namespace StrftimeParserTest
             while (now.DayOfWeek != dayOfWeek) now = now.AddDays(1);
             
             // act
-            var dt = Strftime.ToDateTime(input, format);
+            var dt = Strftime.Parse(input, format);
         
             // assert
             dt.Should().HaveDay(now.Day);
