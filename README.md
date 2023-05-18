@@ -42,4 +42,5 @@ At the moment, StrftimeParser supports these string formats:
 - `%e` - Day of the month as a space-padded number
 - `%F` - Short YYYY-MM-DD date, equivalent to %Y-%m-%d
 
-* The specifiers marked with an asterisk (*) are locale-dependent.
+
+\* The specifiers marked with an asterisk (*) are locale-dependent.
