@@ -1,11 +1,9 @@
 # StrftimeParser
 
-StrftimeParser is a .NET Standard 2.0 library that allows you to convert the C-style strftime string format to a DateTime format compatible with C#.
+StrftimeParser is a .NET Standard 2.0 library that allows you to work with C-style strftime string formats within .NET.
 
-The date and time string formatting functionality in C is based on the strftime function, which allows you to format a date object into a custom string.
-However, when working in C#, the date and time string format is different from that of C, and thus the formatted strings in C cannot be used directly with the DateTime type in C#.
-
-The project provides a main class called `Strftime` that exposes a static method `Parse`
+The project provides a main class called `Strftime` that exposes a static method `Parse`, which allows to convert a 
+formatted string to a DateTime object
 
 ## Usage
 
@@ -27,7 +25,7 @@ using StrftimeParser;
 string strftimeString = "%Y-%m-%d %H:%M:%S";
 DateTime dateTime = Strftime.Parse(strftimeString);
 
-// dateTime now contains the formatted date in the C# format
+// dateTime now contains the formatted date as a .NET DateTime object
 
 ```
 
@@ -35,7 +33,13 @@ DateTime dateTime = Strftime.Parse(strftimeString);
 
 At the moment, StrftimeParser supports these string formats:
 
-- `%a` - abbreviated weekday name
-- `%A` - full weekday name
-- `%d` - day of the month as a zero-padded number
-- `%e` - day of the month as a space-padded number
+- `%a` - Abbreviated weekday name *
+- `%A` - Full weekday name *
+- `%b` - Abbreviated month name *
+- `%B` - Full month name *
+- `%d` - Day of the month as a zero-padded number
+- `%D` - Short MM/DD/YY date, equivalent to %m/%d/%y
+- `%e` - Day of the month as a space-padded number
+- `%F` - Short YYYY-MM-DD date, equivalent to %Y-%m-%d
+
+* The specifiers marked with an asterisk (*) are locale-dependent.

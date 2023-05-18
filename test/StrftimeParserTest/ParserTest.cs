@@ -85,6 +85,71 @@ namespace StrftimeParserTest
             // assert
             act.Should().ThrowExactly<FormatException>();
         }
+
+        [Theory]
+        [InlineData("Jan", "%b", 1)]
+        [InlineData("Feb", "%b", 2)]
+        [InlineData("Mar", "%b", 3)]
+        [InlineData("Apr", "%b", 4)]
+        [InlineData("May", "%b", 5)]
+        [InlineData("Jun", "%b", 6)]
+        [InlineData("Jul", "%b", 7)]
+        [InlineData("Aug", "%b", 8)]
+        [InlineData("Sep", "%b", 9)]
+        [InlineData("Oct", "%b", 10)]
+        [InlineData("Nov", "%b", 11)]
+        [InlineData("Dec", "%b", 12)]
+        public void Parse_Month_Abbreviated(string input, string format, int month)
+        {
+            var dt = Strftime.Parse(input, format);
+
+            dt.Should().HaveMonth(month);
+        }
+        
+        [Theory]
+        [InlineData("January", "%B", 1)]
+        [InlineData("February", "%B", 2)]
+        [InlineData("March", "%B", 3)]
+        [InlineData("April", "%B", 4)]
+        [InlineData("May", "%B", 5)]
+        [InlineData("June", "%B", 6)]
+        [InlineData("July", "%B", 7)]
+        [InlineData("August", "%B", 8)]
+        [InlineData("September", "%B", 9)]
+        [InlineData("October", "%B", 10)]
+        [InlineData("November", "%B", 11)]
+        [InlineData("December", "%B", 12)]
+        public void Parse_Month_Full(string input, string format, int month)
+        {
+            var dt = Strftime.Parse(input, format);
+
+            dt.Should().HaveMonth(month);
+        }
+
+        [Theory]
+        [InlineData("08/23/01", "%D", 1, 8, 23)]
+        [InlineData("08/23/23", "%D", 23, 8, 23)]
+        public void ParseShortMmDdYy(string input, string format, int year, int month, int day)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveDay(day);
+            res.Should().HaveMonth(month);
+            res.Should()
+                .HaveYear(int.Parse(DateTime.Now.ToString("yyyy")[..2] + 
+                                    year.ToString().PadLeft(2, '0')));
+        }
+        
+        [Theory]
+        [InlineData("2001-08-23", "%F", 2001, 8, 23)]
+        public void ParseShortYyyyMmDd(string input, string format, int year, int month, int day)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveDay(day);
+            res.Should().HaveMonth(month);
+            res.Should().HaveYear(year);
+        }
         
         [Theory]
         [InlineData("Mon", "%a", DayOfWeek.Monday)]
@@ -111,6 +176,24 @@ namespace StrftimeParserTest
             dt.Should().HaveDay(now.Day);
             dt.Should().HaveMonth(now.Month);
             dt.Should().HaveYear(now.Year);
+        }
+
+        [Theory]
+        [InlineData("Thu Aug 23 14:55:02 2001", "%c")]
+        public void Parse_FullDate(string input, string format)
+        {
+            // Arrange
+            
+            // Act
+            var dt = Strftime.Parse(input, format);
+            
+            // Assert
+            dt.Should().HaveDay(23);
+            dt.Should().HaveMonth(8);
+            dt.Should().NotHaveYear(2001);
+            dt.Should().HaveHour(14);
+            dt.Should().HaveMinute(55);
+            dt.Should().HaveSecond(02);
         }
     }
 }
