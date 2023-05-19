@@ -55,6 +55,15 @@ namespace StrftimeParser
                 year = shortYyyyMmDd.Yyyy;
             }
             
+            // Year divided by 100
+            if (elements.YearDividedBy100 != null)
+            {
+                var yearDivided = Formatter.ParseYearDividedBy100(elements.YearDividedBy100);
+                if (year != null && !year.Equals(yearDivided)) throw new FormatException("Incoherent year");
+
+                year = yearDivided;
+            }
+            
             // Day of the month
             if (elements.DayOfTheMonthZeroPadded != null)
             {
@@ -160,6 +169,14 @@ namespace StrftimeParser
                                         if (res.AbbreviatedMonth != null && !res.AbbreviatedMonth.Equals(consumed))
                                             throw new FormatException("%b format incoherence");
                                         res.AbbreviatedMonth = consumed;
+                                        break;
+                                    }
+                                    case 'C':
+                                    {
+                                        var consumed = Formatter.ConsumeYearDividedBy100(ref input, ref inputIndex);
+                                        if (res.YearDividedBy100 != null && !res.YearDividedBy100.Equals(consumed))
+                                            throw new FormatException("%C format incoherence");
+                                        res.YearDividedBy100 = consumed;
                                         break;
                                     }
                                     case 'c':

@@ -92,5 +92,26 @@ namespace StrftimeParser
             }
             return now;
         }
+
+        public static string ConsumeYearDividedBy100(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(0, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static int ParseYearDividedBy100(string input)
+        {
+            var now = DateTime.Now;
+            var intYear = now.Year / 100;
+            var yearInput = int.Parse(input);
+            while (intYear != yearInput)
+            {
+                now = now.AddYears(yearInput < intYear ? -100 : 100);
+                intYear = now.Year / 100;
+            }
+
+            return now.Year;
+        }
     }
 }

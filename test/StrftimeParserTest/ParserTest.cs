@@ -142,6 +142,7 @@ namespace StrftimeParserTest
         
         [Theory]
         [InlineData("2001-08-23", "%F", 2001, 8, 23)]
+        [InlineData("2101-07-21", "%F", 2101, 7, 21)]
         public void ParseShortYyyyMmDd(string input, string format, int year, int month, int day)
         {
             var res = Strftime.Parse(input, format);
@@ -149,6 +150,38 @@ namespace StrftimeParserTest
             res.Should().HaveDay(day);
             res.Should().HaveMonth(month);
             res.Should().HaveYear(year);
+        }
+
+        [Theory]
+        [InlineData("20", "%C")]
+        [InlineData("19", "%C")]
+        [InlineData("21", "%C")]
+        public void ParseYearDividedBy100(string input, string format)
+        {
+            var now = DateTime.Now;
+            var intYear = now.Year / 100;
+            var yearInput = int.Parse(input);
+            if (yearInput < intYear)
+            {
+                while (intYear != yearInput)
+                {
+                    now = now.AddYears(-100);
+                    intYear = now.Year / 100;
+                }
+            }
+            else if (yearInput > intYear)
+            {
+                while (intYear != yearInput)
+                {
+                    now = now.AddYears(100);
+                    intYear = now.Year / 100;
+                }
+            }
+
+
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveYear(now.Year);
         }
         
         [Theory]

@@ -10,5 +10,6 @@
         public string AbbreviatedMonth { get; set; }
         public string ShortMmDdYy { get; set; }
         public string ShortYyyyMmDd { get; set; }
+        public string YearDividedBy100 { get; set; }
     }
 }
