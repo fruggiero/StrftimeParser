@@ -165,5 +165,22 @@ namespace StrftimeParser
             inputIndex += 2;
             return res;
         }
+
+        public static string ConsumeDayOfYear(string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 3);
+            inputIndex += 3;
+            return res;
+        }
+
+        public static int ParseDayOfYear(string dayOfYear)
+        {
+            var res = int.Parse(dayOfYear.Substring(0, 3));
+            return res switch
+            {
+                >= 1 and <= 366 => res,
+                _ => throw new FormatException("Invalid day of year")
+            };
+        }
     }
 }

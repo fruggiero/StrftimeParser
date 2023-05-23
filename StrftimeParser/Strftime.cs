@@ -171,6 +171,22 @@ namespace StrftimeParser
 
                 hour = h12;
             }
+            
+            // Day of year
+            if (elements.DayOfYear != null)
+            {
+                var dayOfYear = Formatter.ParseDayOfYear(elements.DayOfYear);
+                var dtCalc = now.AddDays(dayOfYear - now.DayOfYear);
+                if (dayOfTheMonth != null && !dayOfTheMonth.Equals(dtCalc.Day))
+                    throw new FormatException("Incoherent day of the month with day of year");
+                if (month != null && !month.Equals(dtCalc.Month))
+                    throw new FormatException("Incoherent month with day of year");
+                if (year != null && !year.Equals(dtCalc.Year))
+                    throw new FormatException("Incoherent year with day of year");
+                month = dtCalc.Month;
+                dayOfTheMonth = dtCalc.Day;
+                year = dtCalc.Year;
+            }
 
             var res = new DateTime(year ?? now.Year, month ?? now.Month, dayOfTheMonth ?? now.Day, hour ?? 0,
                 minute ?? 0, second ?? 0);
@@ -314,6 +330,14 @@ namespace StrftimeParser
                                         res.ShortYyyyMmDd = shortYyyyMmDd;
                                         break;
                                     }
+                                    case 'j':
+                                        var dayOfYear = Formatter.ConsumeDayOfYear(input, ref inputIndex);
+                                        if (res.DayOfYear != null && !res.DayOfYear.Equals(dayOfYear))
+                                            throw new FormatException("%j format incoherence");
+                                        res.DayOfYear = dayOfYear;
+                                        break;
+                                    default:
+                                        throw new FormatException($"Unrecognized format: %{format[formatIndex]}");
                                 }
                             }
                             break;

@@ -260,6 +260,21 @@ namespace StrftimeParserTest
         }
 
         [Theory]
+        [InlineData("366", "%j", 366)]
+        [InlineData("150", "%j", 150)]
+        [InlineData("001", "%j", 1)]
+        public void ParseDayOfTheYear(string input, string format, int dayOfYear)
+        {
+            var now = DateTime.Now.AddDays(dayOfYear - DateTime.Now.DayOfYear);
+            
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveDay(now.Day);
+            res.Should().HaveMonth(now.Month);
+            res.Should().HaveYear(now.Year);
+        }
+
+        [Theory]
         [InlineData("00 AM", "%I %p")]
         [InlineData("00 PM", "%I %p")]
         [InlineData("13 PM", "%I %p")]
