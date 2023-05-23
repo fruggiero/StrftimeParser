@@ -104,7 +104,7 @@ namespace StrftimeParser
         {
             var now = DateTime.Now;
             var intYear = now.Year / 100;
-            var yearInput = int.Parse(input);
+            var yearInput = int.Parse(input, CultureInfo.InvariantCulture);
             while (intYear != yearInput)
             {
                 now = now.AddYears(yearInput < intYear ? -100 : 100);
@@ -175,7 +175,7 @@ namespace StrftimeParser
 
         public static int ParseDayOfYear(string dayOfYear)
         {
-            var res = int.Parse(dayOfYear.Substring(0, 3));
+            var res = int.Parse(dayOfYear.Substring(0, 3), CultureInfo.InvariantCulture);
             return res switch
             {
                 >= 1 and <= 366 => res,
@@ -192,11 +192,28 @@ namespace StrftimeParser
 
         public static int ParseMonth(string input)
         {
-            var res = int.Parse(input.Substring(0, 2));
+            var res = int.Parse(input.Substring(0, 2), CultureInfo.InvariantCulture);
             return res switch
             {
                 >= 1 and <= 12 => res,
                 _ => throw new FormatException("Invalid month")
+            };
+        }
+
+        public static string ConsumeMinute(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static int ParseMinute(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 0 and <= 59 => res,
+                _ => throw new FormatException("Invalid minute")
             };
         }
     }

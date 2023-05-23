@@ -304,6 +304,17 @@ namespace StrftimeParserTest
         }
 
         [Theory]
+        [InlineData("00", "%M", 0)]
+        [InlineData("59", "%M", 59)]
+        [InlineData("35", "%M", 35)]
+        public void ParseMinute(string input, string format, int expectedMinute)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveMinute(expectedMinute);
+        }
+
+        [Theory]
         [InlineData("00 AM", "%I %p")]
         [InlineData("00 PM", "%I %p")]
         [InlineData("13 PM", "%I %p")]

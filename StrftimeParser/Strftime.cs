@@ -183,6 +183,15 @@ namespace StrftimeParser
                 hour = h12;
             }
             
+            // Minute
+            if (elements.Minute != null)
+            {
+                var m = Formatter.ParseMinute(elements.Minute);
+                if (minute != null && !minute.Equals(m))
+                    throw new FormatException("Incoherent minute");
+                minute = m;
+            }
+            
             // Day of year
             if (elements.DayOfYear != null)
             {
@@ -237,6 +246,12 @@ namespace StrftimeParser
                                         if (res.Month != null && !res.Month.Equals(month))
                                             throw new FormatException("%m format incoherence");
                                         res.Month = month;
+                                        break;
+                                    case 'M':
+                                        var minute = Formatter.ConsumeMinute(ref input, ref inputIndex);
+                                        if (res.Minute != null && !res.Minute.Equals(minute))
+                                            throw new FormatException("%M format incoherence");
+                                        res.Minute = minute;
                                         break;
                                     case 'I':
                                     {
