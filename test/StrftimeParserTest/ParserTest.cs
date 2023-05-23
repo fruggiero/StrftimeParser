@@ -273,6 +273,35 @@ namespace StrftimeParserTest
             res.Should().HaveMonth(now.Month);
             res.Should().HaveYear(now.Year);
         }
+        
+        [Theory]
+        [InlineData("01", "%m", 01)]
+        [InlineData("02", "%m", 02)]
+        [InlineData("03", "%m", 03)]
+        [InlineData("04", "%m", 04)]
+        [InlineData("05", "%m", 05)]
+        [InlineData("06", "%m", 06)]
+        [InlineData("07", "%m", 07)]
+        [InlineData("08", "%m", 08)]
+        [InlineData("09", "%m", 09)]
+        [InlineData("10", "%m", 10)]
+        [InlineData("11", "%m", 11)]
+        [InlineData("12", "%m", 12)]
+        public void ParseMonth(string input, string format, int expectedMonth)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveMonth(expectedMonth);
+        }
+
+        [Theory]
+        [InlineData("13", "%m")]
+        public void Should_NotParse_InvalidMonth(string input, string format)
+        {
+            Action act = () => Strftime.Parse(input, format);
+
+            act.Should().Throw<Exception>();
+        }
 
         [Theory]
         [InlineData("00 AM", "%I %p")]

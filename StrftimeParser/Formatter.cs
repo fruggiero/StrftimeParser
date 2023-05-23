@@ -182,5 +182,22 @@ namespace StrftimeParser
                 _ => throw new FormatException("Invalid day of year")
             };
         }
+
+        public static string ConsumeMonth(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static int ParseMonth(string input)
+        {
+            var res = int.Parse(input.Substring(0, 2));
+            return res switch
+            {
+                >= 1 and <= 12 => res,
+                _ => throw new FormatException("Invalid month")
+            };
+        }
     }
 }

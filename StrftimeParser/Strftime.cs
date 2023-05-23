@@ -127,6 +127,17 @@ namespace StrftimeParser
 
                 month = abbrMonth;
             }
+
+            if (elements.Month != null)
+            {
+                var monthDecimal = Formatter.ParseMonth(elements.Month);
+                if (month != null && !month.Equals(monthDecimal))
+                {
+                    throw new FormatException("Incoherent month");
+                }
+
+                month = monthDecimal;
+            }
             
             // Hour 24
             if (elements.Hour24 != null)
@@ -221,6 +232,12 @@ namespace StrftimeParser
 						
                                 switch (format[formatIndex])
                                 {
+                                    case 'm':
+                                        var month = Formatter.ConsumeMonth(ref input, ref inputIndex);
+                                        if (res.Month != null && !res.Month.Equals(month))
+                                            throw new FormatException("%m format incoherence");
+                                        res.Month = month;
+                                        break;
                                     case 'I':
                                     {
                                         var consumed = Formatter.ConsumeHour12(ref input, ref inputIndex);

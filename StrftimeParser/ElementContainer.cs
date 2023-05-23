@@ -15,5 +15,6 @@
         public string AmPm { get; set; }
         public string Hour12 { get; set; }
         public string DayOfYear { get; set; }
+        public string Month { get; set; }
     }
 }
