@@ -216,5 +216,12 @@ namespace StrftimeParser
                 _ => throw new FormatException("Invalid minute")
             };
         }
+
+        public static string ConsumeNewLine(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 1);
+            inputIndex += 1;
+            return res;
+        }
     }
 }

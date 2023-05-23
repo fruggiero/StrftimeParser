@@ -241,6 +241,9 @@ namespace StrftimeParser
 						
                                 switch (format[formatIndex])
                                 {
+                                    case 'n':
+                                        _ = Formatter.ConsumeNewLine(ref input, ref inputIndex);
+                                        break;
                                     case 'm':
                                         var month = Formatter.ConsumeMonth(ref input, ref inputIndex);
                                         if (res.Month != null && !res.Month.Equals(month))

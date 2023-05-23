@@ -252,6 +252,7 @@ namespace StrftimeParserTest
         [InlineData("10 PM", "%I %p", 22)]
         [InlineData("11 PM", "%I %p", 23)]
         [InlineData("12 PM", "%I %p", 12)]
+        [InlineData("12\nPM", "%I%n%p", 12)]
         public void ParseHour12(string input, string format, int hour)
         {
             var res = Strftime.Parse(input, format);
