@@ -183,6 +183,94 @@ namespace StrftimeParserTest
 
             res.Should().HaveYear(now.Year);
         }
+
+        [Theory]
+        [InlineData("00", "%H", 0)]
+        [InlineData("01", "%H", 1)]
+        [InlineData("02", "%H", 2)]
+        [InlineData("03", "%H", 3)]
+        [InlineData("04", "%H", 4)]
+        [InlineData("05", "%H", 5)]
+        [InlineData("06", "%H", 6)]
+        [InlineData("07", "%H", 7)]
+        [InlineData("08", "%H", 8)]
+        [InlineData("09", "%H", 9)]
+        [InlineData("10", "%H", 10)]
+        [InlineData("11", "%H", 11)]
+        [InlineData("12", "%H", 12)]
+        [InlineData("13", "%H", 13)]
+        [InlineData("14", "%H", 14)]
+        [InlineData("15", "%H", 15)]
+        [InlineData("16", "%H", 16)]
+        [InlineData("17", "%H", 17)]
+        [InlineData("18", "%H", 18)]
+        [InlineData("19", "%H", 19)]
+        [InlineData("20", "%H", 20)]
+        [InlineData("21", "%H", 21)]
+        [InlineData("22", "%H", 22)]
+        [InlineData("23", "%H", 23)]
+        public void ParseHour24(string input, string format, int hour)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveHour(hour);
+        }
+
+        [Theory]
+        [InlineData("24", "%H")]
+        [InlineData("33", "%H")]
+        [InlineData("-1", "%H")]
+        public void ShouldThrow_WhenInvalidHour23(string input, string format)
+        {
+            Action act = () => Strftime.Parse(input, format);
+
+            act.Should().Throw<Exception>();
+        }
+
+        [Theory]
+        [InlineData("01 AM", "%I %p", 1)]
+        [InlineData("02 AM", "%I %p", 2)]
+        [InlineData("03 AM", "%I %p", 3)]
+        [InlineData("04 AM", "%I %p", 4)]
+        [InlineData("05 AM", "%I %p", 5)]
+        [InlineData("06 AM", "%I %p", 6)]
+        [InlineData("07 AM", "%I %p", 7)]
+        [InlineData("08 AM", "%I %p", 8)]
+        [InlineData("09 AM", "%I %p", 9)]
+        [InlineData("10 AM", "%I %p", 10)]
+        [InlineData("11 AM", "%I %p", 11)]
+        [InlineData("12 AM", "%I %p", 0)]
+        [InlineData("01 PM", "%I %p", 13)]
+        [InlineData("02 PM", "%I %p", 14)]
+        [InlineData("03 PM", "%I %p", 15)]
+        [InlineData("04 PM", "%I %p", 16)]
+        [InlineData("05 PM", "%I %p", 17)]
+        [InlineData("06 PM", "%I %p", 18)]
+        [InlineData("07 PM", "%I %p", 19)]
+        [InlineData("08 PM", "%I %p", 20)]
+        [InlineData("09 PM", "%I %p", 21)]
+        [InlineData("10 PM", "%I %p", 22)]
+        [InlineData("11 PM", "%I %p", 23)]
+        [InlineData("12 PM", "%I %p", 12)]
+        public void ParseHour12(string input, string format, int hour)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveHour(hour);
+        }
+
+        [Theory]
+        [InlineData("00 AM", "%I %p")]
+        [InlineData("00 PM", "%I %p")]
+        [InlineData("13 PM", "%I %p")]
+        [InlineData("13 AM", "%I %p")]
+        [InlineData("12 GM", "%I %p")]
+        public void ShouldThrow_When_Invalid12Hour(string input, string format)
+        {
+            Action act = () => Strftime.Parse(input, format);
+
+            act.Should().Throw<Exception>();
+        }
         
         [Theory]
         [InlineData("Mon", "%a", DayOfWeek.Monday)]

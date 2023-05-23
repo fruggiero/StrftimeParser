@@ -11,5 +11,8 @@
         public string ShortMmDdYy { get; set; }
         public string ShortYyyyMmDd { get; set; }
         public string YearDividedBy100 { get; set; }
+        public string Hour24 { get; set; }
+        public string AmPm { get; set; }
+        public string Hour12 { get; set; }
     }
 }

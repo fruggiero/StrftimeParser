@@ -95,7 +95,7 @@ namespace StrftimeParser
 
         public static string ConsumeYearDividedBy100(ref string input, ref int inputIndex)
         {
-            var res = input.Substring(0, 2);
+            var res = input.Substring(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
@@ -112,6 +112,58 @@ namespace StrftimeParser
             }
 
             return now.Year;
+        }
+
+        public static string ConsumeHour24(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static string ParseAmPmDesignation(string input)
+        {
+            var chars = input.Substring(0, 2).ToUpper();
+            return chars switch
+            {
+                "AM" => "AM",
+                "PM" => "PM",
+                _ => throw new ArgumentException("Invalid AM/PM designation")
+            };
+        }
+
+        public static int ParseHour24(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 0 and <= 23 => res,
+                _ => throw new ArgumentException("Invalid 24 hour format")
+            };
+        }
+
+        public static int ParseHour12(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 1 and <= 12 => res,
+                _ => throw new ArgumentException("Invalid 12 hour format")
+            };
+        }
+
+        public static string ConsumeAmPmDesignation(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static string ConsumeHour12(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
         }
     }
 }

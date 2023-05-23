@@ -21,6 +21,10 @@ namespace StrftimeParser
             int? dayOfTheMonth = null;
             int? month = null;
             int? year = null;
+            int? hour = null;
+            int? minute = null;
+            int? second = null;
+            string amPmDesignation = null;
             
             // Short MM/DD/YY date, equivalent to %m/%d/%y
             if (elements.ShortMmDdYy != null)
@@ -124,7 +128,53 @@ namespace StrftimeParser
                 month = abbrMonth;
             }
             
-            var res = new DateTime(year ?? now.Year, month ?? now.Month, dayOfTheMonth ?? now.Day);
+            // Hour 24
+            if (elements.Hour24 != null)
+            {
+                var h24 = Formatter.ParseHour24(elements.Hour24);
+                if (hour != null && hour != h24)
+                    throw new FormatException("Incoherent hour");
+
+                hour = h24;
+            }
+
+            // Hour 12
+            if (elements.AmPm != null)
+            {
+                var amPm = Formatter.ParseAmPmDesignation(elements.AmPm);
+                if (amPmDesignation != null && amPmDesignation != amPm)
+                {
+                    throw new FormatException("Incoherent AM/PM designation");
+                }
+
+                amPmDesignation = amPm;
+            }
+            
+            if (elements.Hour12 != null)
+            {
+                if (amPmDesignation == null)
+                    throw new FormatException("Found 12 hour format without AM/PM designation");
+                
+                var h12 = Formatter.ParseHour12(elements.Hour12);
+
+                h12 = amPmDesignation switch
+                {
+                    "AM" => h12 == 12 ? 0 : h12,
+                    "PM" => (h12 % 12) + 12,
+                    _ => throw new ArgumentOutOfRangeException(amPmDesignation)
+                };
+
+                if (hour != null && !hour.Equals(h12))
+                {
+                    throw new FormatException("Incoherent hour");
+                }
+
+                hour = h12;
+            }
+
+            var res = new DateTime(year ?? now.Year, month ?? now.Month, dayOfTheMonth ?? now.Day, hour ?? 0,
+                minute ?? 0, second ?? 0);
+            
             if (dayOfTheMonth != null && dayOfWeek != null && res.DayOfWeek != dayOfWeek)
             {
                 throw new FormatException("Incoherent day of week");
@@ -155,6 +205,30 @@ namespace StrftimeParser
 						
                                 switch (format[formatIndex])
                                 {
+                                    case 'I':
+                                    {
+                                        var consumed = Formatter.ConsumeHour12(ref input, ref inputIndex);
+                                        if (res.Hour12 != null && !res.Hour12.Equals(consumed))
+                                            throw new FormatException("%I format incoherence");
+                                        res.Hour12 = consumed;
+                                        break;
+                                    }
+                                    case 'p':
+                                    {
+                                        var consumed = Formatter.ConsumeAmPmDesignation(ref input, ref inputIndex);
+                                        if (res.AmPm != null && !res.AmPm.Equals(consumed))
+                                            throw new FormatException("%p format incoherence");
+                                        res.AmPm = consumed;
+                                        break;
+                                    }
+                                    case 'H':
+                                    {
+                                        var consumed = Formatter.ConsumeHour24(ref input, ref inputIndex);
+                                        if (res.Hour24 != null && !res.Hour24.Equals(consumed))
+                                            throw new FormatException("%H format incoherence");
+                                        res.Hour24 = consumed;
+                                        break;
+                                    }
                                     case 'B':
                                     {
                                         var consumed = formatter.ConsumeFullMonth(ref input, ref inputIndex);
