@@ -223,5 +223,29 @@ namespace StrftimeParser
             inputIndex += 1;
             return res;
         }
+
+        public static string ConsumeTab(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 1);
+            inputIndex += 1;
+            return res;
+        }
+
+        public static string ConsumeSecond(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static int ParseSecond(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 0 and <= 60 => res,
+                _ => throw new FormatException("Invalid second")
+            };
+        }
     }
 }

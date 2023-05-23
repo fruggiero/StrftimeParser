@@ -17,5 +17,6 @@
         public string DayOfYear { get; set; }
         public string Month { get; set; }
         public string Minute { get; set; }
+        public string Second { get; set; }
     }
 }

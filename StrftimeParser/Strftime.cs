@@ -192,6 +192,16 @@ namespace StrftimeParser
                 minute = m;
             }
             
+            // Second
+            if (elements.Second != null)
+            {
+                var s = Formatter.ParseSecond(elements.Second);
+                if (second != null && !second.Equals(s))
+                    throw new FormatException("Incoherent second");
+
+                second = s;
+            }
+            
             // Day of year
             if (elements.DayOfYear != null)
             {
@@ -208,8 +218,19 @@ namespace StrftimeParser
                 year = dtCalc.Year;
             }
 
-            var res = new DateTime(year ?? now.Year, month ?? now.Month, dayOfTheMonth ?? now.Day, hour ?? 0,
-                minute ?? 0, second ?? 0);
+            DateTime res;
+            if (second is >= 60)
+            {
+                res = new DateTime(year ?? now.Year, month ?? now.Month, dayOfTheMonth ?? now.Day, hour ?? 0,
+                    minute ?? 0, 59);
+
+                res = res.AddSeconds(second.Value - 59);
+            }
+            else
+            {
+                res = new DateTime(year ?? now.Year, month ?? now.Month, dayOfTheMonth ?? now.Day, hour ?? 0,
+                    minute ?? 0, second ?? 0);
+            }
             
             if (dayOfTheMonth != null && dayOfWeek != null && res.DayOfWeek != dayOfWeek)
             {
@@ -241,6 +262,15 @@ namespace StrftimeParser
 						
                                 switch (format[formatIndex])
                                 {
+                                    case 'S':
+                                        var second = Formatter.ConsumeSecond(ref input, ref inputIndex);
+                                        if (res.Second != null && !res.Second.Equals(second))
+                                            throw new FormatException("%S format incoherence");
+                                        res.Second = second;
+                                        break;
+                                    case 't':
+                                        _ = Formatter.ConsumeTab(ref input, ref inputIndex);
+                                        break;
                                     case 'n':
                                         _ = Formatter.ConsumeNewLine(ref input, ref inputIndex);
                                         break;
