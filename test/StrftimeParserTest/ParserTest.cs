@@ -340,6 +340,21 @@ namespace StrftimeParserTest
             res.Should().HaveSecond(expectedSecond);
         }
 
+        [Theory]
+        [InlineData("1", "%u", DayOfWeek.Monday)]
+        [InlineData("2", "%u", DayOfWeek.Tuesday)]
+        [InlineData("3", "%u", DayOfWeek.Wednesday)]
+        [InlineData("4", "%u", DayOfWeek.Thursday)]
+        [InlineData("5", "%u", DayOfWeek.Friday)]
+        [InlineData("6", "%u", DayOfWeek.Saturday)]
+        [InlineData("7", "%u", DayOfWeek.Sunday)]
+        public void ParseIsoDayOfWeek(string input, string format, DayOfWeek expectedDayOfWeek)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.DayOfWeek.Should().Be(expectedDayOfWeek);
+        }
+
 
         [Theory]
         [InlineData("00 AM", "%I %p")]

@@ -19,5 +19,6 @@
         public string Minute { get; set; }
         public string Second { get; set; }
         public string IsoTime { get; set; }
+        public string IsoWeekDay { get; set; }
     }
 }

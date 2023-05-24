@@ -52,6 +52,7 @@ At the moment, StrftimeParser supports these string formats:
 - `%t` - Horizontal-tab character ('\t')
 - `%S` - Second (00-61)
 - `%T` - ISO 8601 time format (HH:MM:SS), equivalent to %H:%M:%S
+- `%u` - ISO 8601 weekday as number with Monday as 1 (1-7)
 
 
 \* The specifiers marked with an asterisk (*) are locale-dependent.

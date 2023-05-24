@@ -267,5 +267,19 @@ namespace StrftimeParser
             
             return (hour, minute, second);
         }
+
+        public static string ConsumeIsoWeekDay(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(0, 1);
+            inputIndex += 1;
+            return res;
+        }
+
+        public static int ParseIsoWeekDay(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            if (res is < 1 or > 7) throw new FormatException("Invalid iso week day");
+            return res;
+        }
     }
 }

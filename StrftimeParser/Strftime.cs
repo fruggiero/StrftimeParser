@@ -234,6 +234,18 @@ namespace StrftimeParser
                 year = dtCalc.Year;
             }
 
+            // Iso weekday
+            if (elements.IsoWeekDay != null)
+            {
+                var weekDay = Formatter.ParseIsoWeekDay(elements.IsoWeekDay);
+                if (dayOfWeek != null && FromIsoWeekDay(weekDay) != dayOfWeek)
+                {
+                    throw new FormatException("Weekday incoherence");
+                }
+
+                dayOfWeek = FromIsoWeekDay(weekDay);
+            }
+            
             DateTime res;
             if (second is >= 60)
             {
@@ -292,6 +304,12 @@ namespace StrftimeParser
                                         if (res.IsoTime != null && !res.IsoTime.Equals(isoTime))
                                             throw new FormatException("%T format incoherence");
                                         res.IsoTime = isoTime;
+                                        break;
+                                    case 'u':
+                                        var isoWeekDay = Formatter.ConsumeIsoWeekDay(ref input, ref inputIndex);
+                                        if (res.IsoWeekDay != null && !res.IsoWeekDay.Equals(isoWeekDay))
+                                            throw new FormatException("%u format incoherence");
+                                        res.IsoWeekDay = isoWeekDay;
                                         break;
                                     case 'n':
                                         _ = Formatter.ConsumeNewLine(ref input, ref inputIndex);
@@ -436,6 +454,21 @@ namespace StrftimeParser
             }
 
             return res;
+        }
+
+        private static DayOfWeek FromIsoWeekDay(int isoWeekDay)
+        {
+            return isoWeekDay switch
+            {
+                1 => DayOfWeek.Monday,
+                2 => DayOfWeek.Tuesday,
+                3 => DayOfWeek.Wednesday,
+                4 => DayOfWeek.Thursday,
+                5 => DayOfWeek.Friday,
+                6 => DayOfWeek.Saturday,
+                7 => DayOfWeek.Sunday,
+                _ => throw new ArgumentException()
+            };
         }
     }
 }
