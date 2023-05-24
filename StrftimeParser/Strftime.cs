@@ -59,6 +59,26 @@ namespace StrftimeParser
                 year = shortYyyyMmDd.Yyyy;
             }
             
+            // Year
+            if (elements.Year != null)
+            {
+                var y = Formatter.ParseYear(elements.Year);
+                if (year != null && !year.Equals(y))
+                    throw new FormatException("Year incoherence");
+
+                year = y;
+            }
+            
+            // Year two digits
+            if (elements.YearTwoDigits != null)
+            {
+                var yearTwoDigits = Formatter.ParseYearTwoDigits(elements.YearTwoDigits);
+                if (year != null && !yearTwoDigits.Equals(year % 100))
+                    throw new FormatException("Year incoherence");
+
+                year ??= now.Year + (yearTwoDigits - now.Year % 100);
+            }
+            
             // Year divided by 100
             if (elements.YearDividedBy100 != null)
             {
@@ -300,6 +320,20 @@ namespace StrftimeParser
 						
                                 switch (format[formatIndex])
                                 {
+                                    case 'Y':
+                                        var y = Formatter.ConsumeYearFull(ref input, ref inputIndex);
+                                        if (res.Year != null && !res.Year.Equals(y))
+                                            throw new FormatException("%Y format incoherence");
+
+                                        res.Year = y;
+                                        break;
+                                    case 'y':
+                                        var year = Formatter.ConsumeYearTwoDigits(ref input, ref inputIndex);
+                                        if (res.YearTwoDigits != null && !res.YearTwoDigits.Equals(year))
+                                            throw new FormatException("%y format incoherence");
+
+                                        res.YearTwoDigits = year;
+                                        break;
                                     case 'S':
                                         var second = Formatter.ConsumeSecond(ref input, ref inputIndex);
                                         if (res.Second != null && !res.Second.Equals(second))

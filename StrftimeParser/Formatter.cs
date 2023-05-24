@@ -298,5 +298,34 @@ namespace StrftimeParser
                 _ => throw new FormatException("Invalid week day sunday based")
             };
         }
+
+        public static string ConsumeYearTwoDigits(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 2);
+            inputIndex += 2;
+            return res;
+        }
+
+        public static int ParseYearTwoDigits(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 0 and <= 99 => res,
+                _ => throw new FormatException("Invalid year two digits")
+            };
+        }
+
+        public static int ParseYear(string input)
+        {
+            return int.Parse(input, CultureInfo.InvariantCulture);
+        }
+
+        public static string ConsumeYearFull(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 4);
+            inputIndex += 4;
+            return res;
+        }
     }
 }

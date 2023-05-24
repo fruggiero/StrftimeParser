@@ -21,5 +21,7 @@
         public string IsoTime { get; set; }
         public string IsoWeekDay { get; set; }
         public string WeekDaySundayBased { get; set; }
+        public string YearTwoDigits { get; set; }
+        public string Year { get; set; }
     }
 }

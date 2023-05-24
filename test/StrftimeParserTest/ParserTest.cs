@@ -370,6 +370,38 @@ namespace StrftimeParserTest
             res.DayOfWeek.Should().Be(expectedDayOfWeek);
         }
 
+        [Theory]
+        [InlineData("23", "%y")]
+        [InlineData("53", "%y")]
+        public void ParseYearTwoDigits(string input, string format)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Year.Should().Be(DateTime.Now.Year + (int.Parse(input) - DateTime.Now.Year % 100));
+        }
+
+        [Theory]
+        [InlineData("2023", "%Y", 2023)]
+        [InlineData("2053", "%Y", 2053)]
+        [InlineData("1990", "%Y", 1990)]
+        [InlineData("3002", "%Y", 3002)]
+        [InlineData("2023 23", "%Y %y", 2023)]
+        public void ParseYearFull(string input, string format, int expectedYear)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveYear(expectedYear);
+        }
+
+        [Theory]
+        [InlineData("2023 24", "%Y %y")]
+        [InlineData("2024 23", "%Y %y")]
+        public void ShouldThrow_WhenIncoherentYear(string input, string format)
+        {
+            Action act = () => Strftime.Parse(input, format);
+
+            act.Should().Throw<Exception>();
+        }
 
         [Theory]
         [InlineData("00 AM", "%I %p")]

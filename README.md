@@ -29,7 +29,7 @@ DateTime dateTime = Strftime.Parse(strftimeString);
 
 ```
 
-## Format Specifiers
+## Compatibility
 
 At the moment, StrftimeParser supports these format specifiers:
 
@@ -54,6 +54,7 @@ At the moment, StrftimeParser supports these format specifiers:
 - `%T` - ISO 8601 time format (HH:MM:SS), equivalent to %H:%M:%S
 - `%u` - ISO 8601 weekday as number with Monday as 1 (1-7)
 - `%w` - Weekday as a decimal number with Sunday as 0 (0-6)
-
+- `%y` - Year, last two digits (00-99)
+- `%Y` - Year
 
 \* The specifiers marked with an asterisk (*) are locale-dependent.
