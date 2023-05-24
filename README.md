@@ -29,9 +29,9 @@ DateTime dateTime = Strftime.Parse(strftimeString);
 
 ```
 
-## Format Support
+## Format Specifiers
 
-At the moment, StrftimeParser supports these string formats:
+At the moment, StrftimeParser supports these format specifiers:
 
 - `%a` - Abbreviated weekday name *
 - `%A` - Full weekday name *
@@ -53,6 +53,7 @@ At the moment, StrftimeParser supports these string formats:
 - `%S` - Second (00-61)
 - `%T` - ISO 8601 time format (HH:MM:SS), equivalent to %H:%M:%S
 - `%u` - ISO 8601 weekday as number with Monday as 1 (1-7)
+- `%w` - Weekday as a decimal number with Sunday as 0 (0-6)
 
 
 \* The specifiers marked with an asterisk (*) are locale-dependent.

@@ -281,5 +281,22 @@ namespace StrftimeParser
             if (res is < 1 or > 7) throw new FormatException("Invalid iso week day");
             return res;
         }
+
+        public static string ConsumeWeekDaySundayBased(string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 1);
+            inputIndex += 1;
+            return res;
+        }
+
+        public static int ParseWeekDaySundayBased(string input)
+        {
+            var res = int.Parse(input, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 0 and <= 6 => res,
+                _ => throw new FormatException("Invalid week day sunday based")
+            };
+        }
     }
 }

@@ -20,5 +20,6 @@
         public string Second { get; set; }
         public string IsoTime { get; set; }
         public string IsoWeekDay { get; set; }
+        public string WeekDaySundayBased { get; set; }
     }
 }

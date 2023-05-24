@@ -246,6 +246,16 @@ namespace StrftimeParser
                 dayOfWeek = FromIsoWeekDay(weekDay);
             }
             
+            // Weekday as a decimal number with Sunday as 0 (0-6)
+            if (elements.WeekDaySundayBased != null)
+            {
+                var weekDay = Formatter.ParseWeekDaySundayBased(elements.WeekDaySundayBased);
+                if (dayOfWeek != null && FromWeekDaySundayBased(weekDay) != dayOfWeek)
+                    throw new FormatException("Weekday incoherence");
+
+                dayOfWeek = FromWeekDaySundayBased(weekDay);
+            }
+            
             DateTime res;
             if (second is >= 60)
             {
@@ -441,6 +451,15 @@ namespace StrftimeParser
                                             throw new FormatException("%j format incoherence");
                                         res.DayOfYear = dayOfYear;
                                         break;
+                                    case 'w':
+                                        var weekDaySundayBased =
+                                            Formatter.ConsumeWeekDaySundayBased(input, ref inputIndex);
+                                        if (res.WeekDaySundayBased != null &&
+                                            !res.WeekDaySundayBased.Equals(weekDaySundayBased))
+                                            throw new FormatException("%w format incoherence");
+
+                                        res.WeekDaySundayBased = weekDaySundayBased;
+                                        break;
                                     default:
                                         throw new FormatException($"Unrecognized format: %{format[formatIndex]}");
                                 }
@@ -467,6 +486,21 @@ namespace StrftimeParser
                 5 => DayOfWeek.Friday,
                 6 => DayOfWeek.Saturday,
                 7 => DayOfWeek.Sunday,
+                _ => throw new ArgumentException()
+            };
+        }
+
+        private static DayOfWeek FromWeekDaySundayBased(int weekDay)
+        {
+            return weekDay switch
+            {
+                0 => DayOfWeek.Sunday,
+                1 => DayOfWeek.Monday,
+                2 => DayOfWeek.Tuesday,
+                3 => DayOfWeek.Wednesday,
+                4 => DayOfWeek.Thursday,
+                5 => DayOfWeek.Friday,
+                6 => DayOfWeek.Saturday,
                 _ => throw new ArgumentException()
             };
         }
