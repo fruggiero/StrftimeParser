@@ -201,6 +201,22 @@ namespace StrftimeParser
 
                 second = s;
             }
+
+            // Iso time
+            if (elements.IsoTime != null)
+            {
+                var (h, m, s) = Formatter.ParseIsoTime(elements.IsoTime);
+                if (hour != null && !hour.Equals(h))
+                    throw new FormatException("Incoherent hour");
+                if (minute != null && !minute.Equals(m))
+                    throw new FormatException("Incoherent minute");
+                if (second != null && !second.Equals(s))
+                    throw new FormatException("Incoherent second");
+
+                hour = h;
+                minute = m;
+                second = s;
+            }
             
             // Day of year
             if (elements.DayOfYear != null)
@@ -270,6 +286,12 @@ namespace StrftimeParser
                                         break;
                                     case 't':
                                         _ = Formatter.ConsumeTab(ref input, ref inputIndex);
+                                        break;
+                                    case 'T':
+                                        var isoTime = Formatter.ConsumeIsoTime(ref input, ref inputIndex);
+                                        if (res.IsoTime != null && !res.IsoTime.Equals(isoTime))
+                                            throw new FormatException("%T format incoherence");
+                                        res.IsoTime = isoTime;
                                         break;
                                     case 'n':
                                         _ = Formatter.ConsumeNewLine(ref input, ref inputIndex);

@@ -51,6 +51,7 @@ At the moment, StrftimeParser supports these string formats:
 - `%n` - New-line character ('\n')
 - `%t` - Horizontal-tab character ('\t')
 - `%S` - Second (00-61)
+- `%T` - ISO 8601 time format (HH:MM:SS), equivalent to %H:%M:%S
 
 
 \* The specifiers marked with an asterisk (*) are locale-dependent.

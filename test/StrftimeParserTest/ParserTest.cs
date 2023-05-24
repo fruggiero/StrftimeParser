@@ -326,6 +326,20 @@ namespace StrftimeParserTest
             res.Should().HaveSecond(expectedSecond);
         }
 
+        [Theory]
+        [InlineData("14:55:02", "%T", 14, 55, 2)]
+        [InlineData("14:55:60", "%T", 14, 56, 0)]
+        [InlineData("23:01:01", "%T", 23, 1, 1)]
+        [InlineData("00:01:01", "%T", 0, 1, 1)]
+        public void ParseIsoTime(string input, string format, int expectedHour, int expectedMinute, int expectedSecond)
+        {
+            var res = Strftime.Parse(input, format);
+
+            res.Should().HaveHour(expectedHour);
+            res.Should().HaveMinute(expectedMinute);
+            res.Should().HaveSecond(expectedSecond);
+        }
+
 
         [Theory]
         [InlineData("00 AM", "%I %p")]

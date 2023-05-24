@@ -18,5 +18,6 @@
         public string Month { get; set; }
         public string Minute { get; set; }
         public string Second { get; set; }
+        public string IsoTime { get; set; }
     }
 }

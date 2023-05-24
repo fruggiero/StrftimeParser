@@ -247,5 +247,25 @@ namespace StrftimeParser
                 _ => throw new FormatException("Invalid second")
             };
         }
+
+        public static string ConsumeIsoTime(ref string input, ref int inputIndex)
+        {
+            var res = input.Substring(inputIndex, 8);
+            inputIndex += 8;
+            return res;
+        }
+
+        public static (int, int, int) ParseIsoTime(string input)
+        {
+            var hour = int.Parse(input.Substring(0, 2), CultureInfo.InvariantCulture);
+            var minute = int.Parse(input.Substring(3, 2), CultureInfo.InvariantCulture);
+            var second = int.Parse(input.Substring(6, 2), CultureInfo.InvariantCulture);
+
+            if (hour is < 0 or > 23) throw new FormatException("Invalid iso time hour");
+            if (minute is < 0 or > 59) throw new FormatException("Invalid iso time minute");
+            if (second is < 0 or > 60) throw new FormatException("Invalid iso time second");
+            
+            return (hour, minute, second);
+        }
     }
 }
