@@ -270,7 +270,7 @@ namespace StrftimeParser
 
         public static string ConsumeIsoWeekDay(ref string input, ref int inputIndex)
         {
-            var res = input.Substring(0, 1);
+            var res = input.Substring(inputIndex, 1);
             inputIndex += 1;
             return res;
         }
