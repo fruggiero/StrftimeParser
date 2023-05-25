@@ -37,6 +37,8 @@ class Build : NukeBuild
     
     [Parameter("ProjectUrl")] readonly string ProjectUrl;
 
+    [Parameter][Secret] readonly string NuGetApiKey;
+    
     [NerdbankGitVersioning]
     readonly NerdbankGitVersioning NerdbankVersioning;
 
@@ -108,11 +110,16 @@ class Build : NukeBuild
                 .EnableNoBuild());
         });
 
-    Target Deploy => _ => _
+    Target Publish => _ => _
         .After(Pack)
         .Executes(() =>
         {
-            FileSystemTasks.CopyDirectoryRecursively(OutputDirectory, @"D:\local_packages", DirectoryExistsPolicy.Merge,
-                FileExistsPolicy.Overwrite);
+            var path = OutputDirectory /
+                       $"{System.IO.Path.GetFileNameWithoutExtension(Solution)}.{NerdbankVersioning.NuGetPackageVersion}.nupkg";
+            DotNetTasks.DotNetNuGetPush(_ => _
+                .SetApiKey(NuGetApiKey)
+                .SetTargetPath(path)
+                .SetSource("https://api.nuget.org/v3/index.json")
+            );
         });
 }
