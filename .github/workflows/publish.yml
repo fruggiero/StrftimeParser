@@ -41,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
           
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v3.1.0
   
       - name: Run './build.sh Compile Test Pack' 
         run: ./build.sh Compile Test Pack
@@ -77,7 +77,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
           
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v3.1.0
 
       - name: Download a Build Artifact
         uses: actions/download-artifact@v3.0.2
