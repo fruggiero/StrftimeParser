@@ -1,0 +1,7 @@
+{
+  "$schema": "./build.schema.json",
+  "Solution": "StrftimeParser.sln",
+  "PackageDescription": "A Strftime format parser for .net",
+  "Authors": "Federico Ruggiero",
+  "ProjectUrl": "https://github.com/fruggiero/StrftimeParser"
+}
