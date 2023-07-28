@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using DateTime = System.DateTime;
 
@@ -6,11 +7,34 @@ namespace StrftimeParser
 {
     public static class Strftime
     {
-        public static DateTime Parse(string input, string format)
+        /// <summary>
+        /// Convert a strftime-formatted string into a DateTime object.
+        /// For the conversion, the current culture is used.
+        /// </summary>
+        /// <param name="input">The string which contains the formatted date</param>
+        /// <param name="format">A format specifier</param>
+        /// <returns>A DateTime object</returns>
+        /// <exception cref="FormatException">There is something wrong with the formatted date</exception>
+        /// <exception cref="ArgumentOutOfRangeException">There is something wrong with the formatted date</exception>
+        public static DateTime Parse(string input, string format) => Parse(input, format, CultureInfo.CurrentCulture);
+
+        /// <summary>
+        /// Convert a strftime-formatted string into a DateTime object.
+        /// For the conversion, a specified culture is used.
+        /// </summary>
+        /// <param name="input">The string which contains the formatted date</param>
+        /// <param name="format">A format specifier</param>
+        /// <param name="culture">A culture-info used for the conversion</param>
+        /// <returns>A DateTime object</returns>
+        /// <exception cref="FormatException">There is something wrong with the formatted date</exception>
+        /// <exception cref="ArgumentOutOfRangeException">There is something wrong with the formatted date</exception>
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+        public static DateTime Parse(string input, string format, CultureInfo culture)
         {
-            Formatter formatter = CultureInfo.CurrentCulture.Name switch
+            Formatter formatter = culture.Name switch
             {
-                _ => new EnUsFormatter()
+                "en-US" => new EnUsFormatter(),
+                _ => throw new NotImplementedException($"The culture {culture.Name} is unrecognized")
             };
             
             var elements = ParseElements(input, format, formatter);
@@ -302,7 +326,7 @@ namespace StrftimeParser
 
             return res;
         }
-
+        
         private static ElementContainer ParseElements(string input, string format, Formatter formatter)
         {
             var res = new ElementContainer();
@@ -317,7 +341,7 @@ namespace StrftimeParser
                             if(formatIndex + 1 < format.Length)
                             {
                                 formatIndex++;
-						
+                        
                                 switch (format[formatIndex])
                                 {
                                     case 'Y':

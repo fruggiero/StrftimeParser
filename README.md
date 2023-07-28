@@ -22,11 +22,25 @@ Here an example of code:
 ```
 using StrftimeParser;
 
-string strftimeString = "%Y-%m-%d %H:%M:%S";
-DateTime dateTime = Strftime.Parse(strftimeString);
+
+string strftimeString = "2001-08-23 14:55:02";
+string formatSpecifier = "%Y-%m-%d %H:%M:%S";
+
+DateTime dateTime = Strftime.Parse(strftimeString, formatSpecifier);
 
 // dateTime now contains the formatted date as a .NET DateTime object
 
+```
+
+## How to Use a specified CultureInfo
+
+To execute the parsing with a specific Culture, you can pass
+a CultureInfo instance to the `Parse` method:
+
+```
+DateTime dateTime = Strftime.Parse(strftimeString, formatSpecifier, CultureInfo.GetCultureInfo("it-IT"));
+
+// dateTime now contains the formatted date as a .NET DateTime object
 ```
 
 ## Compatibility
