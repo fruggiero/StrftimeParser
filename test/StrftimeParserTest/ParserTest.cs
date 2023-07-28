@@ -10,6 +10,8 @@ namespace StrftimeParserTest
 {
     public class ParserTest
     {
+        private CultureInfo _culture = CultureInfo.GetCultureInfo("en-US");
+
         [SuppressMessage("ReSharper", "SimplifyStringInterpolation")]
         public static IEnumerable<object[]> ShouldThrow_WhenIncoherentDayOfMonth_WithDayOfWeek_Data()
         {
@@ -29,7 +31,7 @@ namespace StrftimeParserTest
             // Arrange
 
             // Act
-            Action act = () => Strftime.Parse(input, format);
+            Action act = () => Strftime.Parse(input, format, _culture);
             
             // Assert
             act.Should().Throw<FormatException>();
@@ -41,7 +43,7 @@ namespace StrftimeParserTest
         public void ShouldThrow_WhenIncoherentDayOfMonth(string input, string format)
         {
             // Act
-            Action act = () => _ = Strftime.Parse(input, format);
+            Action act = () => _ = Strftime.Parse(input, format, _culture);
             
             // Assert
             act.Should().Throw<FormatException>();
@@ -65,7 +67,7 @@ namespace StrftimeParserTest
             }
             
             // Act
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
             
             // Assert
             res.Day.Should().Be(now.Day);
@@ -80,7 +82,7 @@ namespace StrftimeParserTest
             // arrange
 
             // act
-            Action act = () => _ = Strftime.Parse(input, format);
+            Action act = () => _ = Strftime.Parse(input, format, _culture);
         
             // assert
             act.Should().ThrowExactly<FormatException>();
@@ -101,7 +103,7 @@ namespace StrftimeParserTest
         [InlineData("Dec", "%b", 12)]
         public void Parse_Month_Abbreviated(string input, string format, int month)
         {
-            var dt = Strftime.Parse(input, format);
+            var dt = Strftime.Parse(input, format, _culture);
 
             dt.Should().HaveMonth(month);
         }
@@ -121,7 +123,7 @@ namespace StrftimeParserTest
         [InlineData("December", "%B", 12)]
         public void Parse_Month_Full(string input, string format, int month)
         {
-            var dt = Strftime.Parse(input, format);
+            var dt = Strftime.Parse(input, format, _culture);
 
             dt.Should().HaveMonth(month);
         }
@@ -131,7 +133,7 @@ namespace StrftimeParserTest
         [InlineData("08/23/23", "%D", 23, 8, 23)]
         public void ParseShortMmDdYy(string input, string format, int year, int month, int day)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveDay(day);
             res.Should().HaveMonth(month);
@@ -145,7 +147,7 @@ namespace StrftimeParserTest
         [InlineData("2101-07-21", "%F", 2101, 7, 21)]
         public void ParseShortYyyyMmDd(string input, string format, int year, int month, int day)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveDay(day);
             res.Should().HaveMonth(month);
@@ -179,7 +181,7 @@ namespace StrftimeParserTest
             }
 
 
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveYear(now.Year);
         }
@@ -211,7 +213,7 @@ namespace StrftimeParserTest
         [InlineData("23", "%H", 23)]
         public void ParseHour24(string input, string format, int hour)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveHour(hour);
         }
@@ -222,7 +224,7 @@ namespace StrftimeParserTest
         [InlineData("-1", "%H")]
         public void ShouldThrow_WhenInvalidHour23(string input, string format)
         {
-            Action act = () => Strftime.Parse(input, format);
+            Action act = () => Strftime.Parse(input, format, _culture);
 
             act.Should().Throw<Exception>();
         }
@@ -255,7 +257,7 @@ namespace StrftimeParserTest
         [InlineData("12\nPM", "%I%n%p", 12)]
         public void ParseHour12(string input, string format, int hour)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveHour(hour);
         }
@@ -268,7 +270,7 @@ namespace StrftimeParserTest
         {
             var now = DateTime.Now.AddDays(dayOfYear - DateTime.Now.DayOfYear);
             
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveDay(now.Day);
             res.Should().HaveMonth(now.Month);
@@ -290,7 +292,7 @@ namespace StrftimeParserTest
         [InlineData("12", "%m", 12)]
         public void ParseMonth(string input, string format, int expectedMonth)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveMonth(expectedMonth);
         }
@@ -299,7 +301,7 @@ namespace StrftimeParserTest
         [InlineData("13", "%m")]
         public void Should_NotParse_InvalidMonth(string input, string format)
         {
-            Action act = () => Strftime.Parse(input, format);
+            Action act = () => Strftime.Parse(input, format, _culture);
 
             act.Should().Throw<Exception>();
         }
@@ -310,7 +312,7 @@ namespace StrftimeParserTest
         [InlineData("35", "%M", 35)]
         public void ParseMinute(string input, string format, int expectedMinute)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveMinute(expectedMinute);
         }
@@ -321,7 +323,7 @@ namespace StrftimeParserTest
         [InlineData("60", "%S", 0)]
         public void ParseSecond(string input, string format, int expectedSecond)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveSecond(expectedSecond);
         }
@@ -333,7 +335,7 @@ namespace StrftimeParserTest
         [InlineData("00:01:01", "%T", 0, 1, 1)]
         public void ParseIsoTime(string input, string format, int expectedHour, int expectedMinute, int expectedSecond)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveHour(expectedHour);
             res.Should().HaveMinute(expectedMinute);
@@ -350,7 +352,7 @@ namespace StrftimeParserTest
         [InlineData("7", "%u", DayOfWeek.Sunday)]
         public void ParseIsoDayOfWeek(string input, string format, DayOfWeek expectedDayOfWeek)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.DayOfWeek.Should().Be(expectedDayOfWeek);
         }
@@ -365,7 +367,7 @@ namespace StrftimeParserTest
         [InlineData("6", "%w", DayOfWeek.Saturday)]
         public void ParseDayOfWeekSundayBased(string input, string format, DayOfWeek expectedDayOfWeek)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.DayOfWeek.Should().Be(expectedDayOfWeek);
         }
@@ -375,7 +377,7 @@ namespace StrftimeParserTest
         [InlineData("53", "%y")]
         public void ParseYearTwoDigits(string input, string format)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Year.Should().Be(DateTime.Now.Year + (int.Parse(input) - DateTime.Now.Year % 100));
         }
@@ -388,7 +390,7 @@ namespace StrftimeParserTest
         [InlineData("2023 23", "%Y %y", 2023)]
         public void ParseYearFull(string input, string format, int expectedYear)
         {
-            var res = Strftime.Parse(input, format);
+            var res = Strftime.Parse(input, format, _culture);
 
             res.Should().HaveYear(expectedYear);
         }
@@ -398,7 +400,7 @@ namespace StrftimeParserTest
         [InlineData("2024 23", "%Y %y")]
         public void ShouldThrow_WhenIncoherentYear(string input, string format)
         {
-            Action act = () => Strftime.Parse(input, format);
+            Action act = () => Strftime.Parse(input, format, _culture);
 
             act.Should().Throw<Exception>();
         }
@@ -411,7 +413,7 @@ namespace StrftimeParserTest
         [InlineData("12 GM", "%I %p")]
         public void ShouldThrow_When_Invalid12Hour(string input, string format)
         {
-            Action act = () => Strftime.Parse(input, format);
+            Action act = () => Strftime.Parse(input, format, _culture);
 
             act.Should().Throw<Exception>();
         }
@@ -430,12 +432,12 @@ namespace StrftimeParserTest
         {
             // arrange
             var now = DateTime.Now;
-            var firstDayOfWeek = CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
+            var firstDayOfWeek = _culture.DateTimeFormat.FirstDayOfWeek;
             while (now.DayOfWeek != firstDayOfWeek) now = now.AddDays(-1);
             while (now.DayOfWeek != dayOfWeek) now = now.AddDays(1);
             
             // act
-            var dt = Strftime.Parse(input, format);
+            var dt = Strftime.Parse(input, format, _culture);
         
             // assert
             dt.Should().HaveDay(now.Day);
@@ -450,12 +452,13 @@ namespace StrftimeParserTest
             // Arrange
             
             // Act
-            var dt = Strftime.Parse(input, format);
+            var dt = Strftime.Parse(input, format, _culture);
             
             // Assert
             dt.Should().HaveDay(23);
             dt.Should().HaveMonth(8);
-            dt.Should().NotHaveYear(2001);
+            dt.Should().HaveYear(2001);
+            dt.DayOfWeek.Should().Be(DayOfWeek.Thursday);
             dt.Should().HaveHour(14);
             dt.Should().HaveMinute(55);
             dt.Should().HaveSecond(02);
