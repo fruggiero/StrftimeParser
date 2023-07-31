@@ -55,7 +55,7 @@ At the moment, StrftimeParser supports these format specifiers:
 - `%D` - Short MM/DD/YY date, equivalent to %m/%d/%y
 - `%e` - Day of the month as a space-padded number
 - `%F` - Short YYYY-MM-DD date, equivalent to %Y-%m-%d
-- `%c` - Date an time representation
+- `%c` - Date and time representation
 - `%C` - Year divided by 100 and truncated to integer (00-99)
 - `%I` - Hour in 12h format (01-12)
 - `%p` - AM or PM designation
