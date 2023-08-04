@@ -1,3 +1,5 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L1NVECU)
+
 # StrftimeParser
 
 StrftimeParser is a .NET Standard 2.0 library that allows you to work with C-style strftime string formats within .NET.
