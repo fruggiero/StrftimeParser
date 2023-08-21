@@ -28,7 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set Locale
-        run: sudo locale-gen it_IT.UTF-8
+        run: | 
+          sudo locale-gen it_IT.UTF-8
+          sudo update-locale LANG=it_IT.UTF-8
       - name: Checkout
         uses: actions/checkout@v3
         with:
