@@ -36,11 +36,11 @@ namespace StrftimeParserTest
         }
 
         [Theory]
-        [InlineData("lunedì", "%A", DayOfWeek.Monday)]
-        [InlineData("martedì", "%A", DayOfWeek.Tuesday)]
-        [InlineData("mercoledì", "%A", DayOfWeek.Wednesday)]
-        [InlineData("giovedì", "%A", DayOfWeek.Thursday)]
-        [InlineData("venerdì", "%A", DayOfWeek.Friday)]
+        [InlineData("lunedÃ¬", "%A", DayOfWeek.Monday)]
+        [InlineData("martedÃ¬", "%A", DayOfWeek.Tuesday)]
+        [InlineData("mercoledÃ¬", "%A", DayOfWeek.Wednesday)]
+        [InlineData("giovedÃ¬", "%A", DayOfWeek.Thursday)]
+        [InlineData("venerdÃ¬", "%A", DayOfWeek.Friday)]
         [InlineData("sabato", "%A", DayOfWeek.Saturday)]
         [InlineData("domenica", "%A", DayOfWeek.Sunday)]
         public void Parse_DayOfWeek(string input, string format, DayOfWeek dayOfWeek)
