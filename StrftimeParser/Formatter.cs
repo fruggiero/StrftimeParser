@@ -5,10 +5,76 @@ namespace StrftimeParser
 {
     internal abstract class Formatter
     {
-        public abstract string ConsumeDayOfWeek(ref string input, ref int inputIndex);
-        public abstract string ConsumeAbbreviatedDayOfWeek(ref string input, ref int inputIndex);
-        public abstract string ConsumeAbbreviatedMonth(ref string input, ref int inputIndex);
-        public abstract string ConsumeFullMonth(ref string input, ref int inputIndex);
+        protected abstract CultureInfo Culture { get; }
+
+        public virtual string ConsumeDayOfWeek(ref string input, ref int inputIndex)
+        {
+            foreach (var dayName in Culture.DateTimeFormat.DayNames)
+            {
+                if (input.Length < dayName.Length + inputIndex
+                    || input.Substring(inputIndex, dayName.Length) != dayName)
+                {
+                    continue;
+                }
+
+                inputIndex += dayName.Length;
+                return dayName;
+            }
+
+            throw new FormatException("Invalid day of week for this culture");
+        }
+        
+        public virtual string ConsumeAbbreviatedDayOfWeek(ref string input, ref int inputIndex)
+        {
+            foreach (var abbreviatedDayName in Culture.DateTimeFormat.AbbreviatedDayNames)
+            {
+                if (input.Length < abbreviatedDayName.Length + inputIndex
+                    || input.Substring(inputIndex, abbreviatedDayName.Length) != abbreviatedDayName)
+                {
+                    continue;
+                }
+
+                inputIndex += abbreviatedDayName.Length;
+                return abbreviatedDayName;
+            }
+
+            throw new FormatException("Invalid abbreviated day of week for this culture");
+        }
+
+        public virtual string ConsumeAbbreviatedMonth(ref string input, ref int inputIndex)
+        {
+            foreach (var abbreviatedMonth in Culture.DateTimeFormat.AbbreviatedMonthNames)
+            {
+                if (input.Length < abbreviatedMonth.Length + inputIndex
+                    || input.Substring(inputIndex, abbreviatedMonth.Length) != abbreviatedMonth)
+                {
+                    continue;
+                }
+
+                inputIndex += abbreviatedMonth.Length;
+                return abbreviatedMonth;
+            }
+
+            throw new FormatException("Invalid abbreviated month for this culture");
+        }
+
+        public virtual string ConsumeFullMonth(ref string input, ref int inputIndex)
+        {
+            foreach (var month in Culture.DateTimeFormat.MonthNames)
+            {
+                if (input.Length < month.Length + inputIndex
+                    || input.Substring(inputIndex, month.Length) != month)
+                {
+                    continue;
+                }
+
+                inputIndex += month.Length;
+                return month;
+            }
+
+            throw new FormatException("Invalid month for this culture");
+        }
+
         public static string ConsumeDayOfTheMonth(string input, ref int inputIndex)
         {
             var res = input.Substring(inputIndex, 2);
@@ -49,16 +115,51 @@ namespace StrftimeParser
                 Dd = int.Parse(input.Substring(8, 2))
             };
         }
+
+        public virtual int ParseMonthFull(string input)
+        {
+            for (int i = 0; i < Culture.DateTimeFormat.MonthNames.Length; i++)
+            {
+                if (input == Culture.DateTimeFormat.MonthNames[i])
+                    return i + 1;
+            }
+            throw new FormatException("Invalid month for this culture");
+        }
+
+        public virtual int ParseMonthAbbreviated(string input)
+        {
+            for (int i = 0; i < Culture.DateTimeFormat.AbbreviatedMonthNames.Length; i++)
+            {
+                if (input == Culture.DateTimeFormat.AbbreviatedMonthNames[i])
+                    return i + 1;
+            }
+            throw new FormatException("Invalid abbreviated month for this culture");
+        }
+
+        public virtual DayOfWeek ParseDayOfWeekAbbreviated(string input)
+        {
+            for (int i = 0; i < Culture.DateTimeFormat.AbbreviatedDayNames.Length; i++)
+            {
+                if (input == Culture.DateTimeFormat.AbbreviatedDayNames[i])
+                    return (DayOfWeek)i;
+            }
+            throw new FormatException("Invalid abbreviated day of week for this culture");
+        }
+
+        public virtual DayOfWeek ParseDayOfWeekFull(string input)
+        {
+            for (int i = 0; i < Culture.DateTimeFormat.DayNames.Length; i++)
+            {
+                if (input == Culture.DateTimeFormat.DayNames[i])
+                    return (DayOfWeek)i;
+            }
+            throw new FormatException("Invalid day of week for this culture");
+        }
         
-        public abstract int ParseMonthFull(string input);
-        public abstract int ParseMonthAbbreviated(string input);
-        public abstract DayOfWeek ParseDayOfWeekAbbreviated(string input);
-        public abstract DayOfWeek ParseDayOfWeekFull(string input);
-        
-        public static DateTime ToDayOfWeek(DateTime source, DayOfWeek dayOfWeek)
+        public DateTime ToDayOfWeek(DateTime source, DayOfWeek dayOfWeek)
         {
             var now = source;
-            var firstDayOfWeek = CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
+            var firstDayOfWeek = Culture.DateTimeFormat.FirstDayOfWeek;
             while (now.DayOfWeek != firstDayOfWeek) now = now.AddDays(-1);
             while (now.DayOfWeek != dayOfWeek) now = now.AddDays(1);
             return now;

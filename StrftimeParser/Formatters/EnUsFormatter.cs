@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Globalization;
 
-namespace StrftimeParser
+namespace StrftimeParser.Formatters
 {
     internal class EnUsFormatter : Formatter
     {
-        private CultureInfo _culture = CultureInfo.GetCultureInfo("en-us");
-        
+        protected override CultureInfo Culture => CultureInfo.GetCultureInfo("en-US");
+
         public override string ConsumeAbbreviatedDayOfWeek(ref string input, ref int inputIndex)
         {
             var abbrWeekDay = input.Substring(inputIndex, 3);

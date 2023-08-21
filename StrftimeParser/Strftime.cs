@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-
+using StrftimeParser.Formatters;
 using DateTime = System.DateTime;
 
 namespace StrftimeParser
@@ -35,7 +35,7 @@ namespace StrftimeParser
             Formatter formatter = culture.Name switch
             {
                 "en-US" => new EnUsFormatter(),
-                _ => throw new NotImplementedException($"The culture {culture.Name} is unrecognized")
+                _ => new GenericFormatter(culture)
             };
 
             var elements = ParseElements(input, format, formatter);
@@ -322,7 +322,7 @@ namespace StrftimeParser
 
             if (dayOfTheMonth == null && dayOfWeek != null)
             {
-                res = Formatter.ToDayOfWeek(res, dayOfWeek.Value);
+                res = formatter.ToDayOfWeek(res, dayOfWeek.Value);
             }
 
             return res;
