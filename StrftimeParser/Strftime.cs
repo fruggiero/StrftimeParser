@@ -108,9 +108,12 @@ namespace StrftimeParser
             // Year divided by 100
             if (elements.YearDividedBy100 != null)
             {
-                var yearDivided = Formatter.ParseYearDividedBy100(elements.YearDividedBy100);
-                if (year != null && !yearDivided.Equals(year / 100)) throw new FormatException("Incoherent year");
-                year = yearDivided * 100;
+                if (year == null) year = 1970;
+                else
+                {
+                    var yearDivided = Formatter.ParseYearDividedBy100(elements.YearDividedBy100);
+                    if (year != null && !yearDivided.Equals(year / 100)) throw new FormatException("Incoherent year");
+                }
             }
 
             // Day of the month

@@ -155,12 +155,12 @@ namespace StrftimeParserTest
         }
 
         [Theory]
-        [InlineData("20", "%C", 2000)]
-        [InlineData("23", "%C", 2300)]
-        [InlineData("19", "%C", 1900)]
-        [InlineData("03", "%C", 300)]
-        [InlineData("20 2023", "%C %Y", 2000)]
-        [InlineData("19 1975", "%C %Y", 1900)]
+        [InlineData("20", "%C", 1970)]
+        [InlineData("23", "%C", 1970)]
+        [InlineData("19", "%C", 1970)]
+        [InlineData("03", "%C", 1970)]
+        [InlineData("20 2023", "%C %Y", 2023)]
+        [InlineData("19 1975", "%C %Y", 1975)]
         public void ParseYearDividedBy100(string input, string format, int expectedYear)
         {
             var res = Strftime.Parse(input, format, _culture);
