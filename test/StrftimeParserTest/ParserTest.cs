@@ -463,5 +463,20 @@ namespace StrftimeParserTest
             dt.Should().HaveMinute(55);
             dt.Should().HaveSecond(02);
         }
+
+        [Theory]
+        [InlineData("2023-08-07T17:47:09", "%Y-%m-%dT%H:%M:%S")]
+        [InlineData("ZZ 2023-08-07T17:47:09 asd", "ZZ %Y-%m-%dT%H:%M:%S asd")]
+        public void Parse_WithFixedCharacters(string input ,string format)
+        {
+            var dt = Strftime.Parse(input, format, _culture);
+
+            dt.Should().HaveYear(2023);
+            dt.Should().HaveMonth(08);
+            dt.Should().HaveDay(07);
+            dt.Should().HaveHour(17);
+            dt.Should().HaveMinute(47);
+            dt.Should().HaveSecond(09);
+        }
     }
 }
