@@ -11,6 +11,7 @@ namespace StrftimeParser
         /// <summary>
         /// Convert a strftime-formatted string into a DateTime object.
         /// For the conversion, the current culture is used.
+        /// This method is the equivalent of strptime in C
         /// </summary>
         /// <param name="input">The string which contains the formatted date</param>
         /// <param name="format">A format specifier</param>
@@ -108,9 +109,8 @@ namespace StrftimeParser
             if (elements.YearDividedBy100 != null)
             {
                 var yearDivided = Formatter.ParseYearDividedBy100(elements.YearDividedBy100);
-                if (year != null && !year.Equals(yearDivided)) throw new FormatException("Incoherent year");
-
-                year = yearDivided;
+                if (year != null && !yearDivided.Equals(year / 100)) throw new FormatException("Incoherent year");
+                year = yearDivided * 100;
             }
 
             // Day of the month

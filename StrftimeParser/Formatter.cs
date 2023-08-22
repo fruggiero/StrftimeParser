@@ -203,16 +203,7 @@ namespace StrftimeParser
 
         public static int ParseYearDividedBy100(string input)
         {
-            var now = DateTime.Now;
-            var intYear = now.Year / 100;
-            var yearInput = int.Parse(input, CultureInfo.InvariantCulture);
-            while (intYear != yearInput)
-            {
-                now = now.AddYears(yearInput < intYear ? -100 : 100);
-                intYear = now.Year / 100;
-            }
-
-            return now.Year;
+            return int.Parse(input, CultureInfo.InvariantCulture);
         }
 
         public static string ConsumeHour24(ref string input, ref int inputIndex)
