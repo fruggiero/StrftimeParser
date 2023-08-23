@@ -46,7 +46,7 @@ namespace StrftimeParser
             DayOfWeek? dayOfWeek = null;
             int? dayOfTheMonth = null;
             int? month = null;
-            int? year = null;
+            var year = new WrappedInt(1970);
             int? hour = null;
             int? minute = null;
             int? second = null;
@@ -60,7 +60,7 @@ namespace StrftimeParser
                     throw new FormatException("Incoherent day of the month");
                 if (month != null && !month.Equals(shortMmDdYy.Mm))
                     throw new FormatException("Incoherent month");
-                if (year != null && !year.Equals(shortMmDdYy.Yy))
+                if (!year.IsDefault && !year.Equals(shortMmDdYy.Yy))
                     throw new FormatException("Incoherent year");
 
                 dayOfTheMonth = shortMmDdYy.Dd;
@@ -77,7 +77,7 @@ namespace StrftimeParser
                     throw new FormatException("Incoherent day of the month");
                 if (month != null && !month.Equals(shortYyyyMmDd.Mm))
                     throw new FormatException("Incoherent month");
-                if (year != null && !year.Equals(shortYyyyMmDd.Yyyy))
+                if (!year.IsDefault && !year.Equals(shortYyyyMmDd.Yyyy))
                     throw new FormatException("Incoherent year");
 
                 dayOfTheMonth = shortYyyyMmDd.Dd;
@@ -89,30 +89,30 @@ namespace StrftimeParser
             if (elements.Year != null)
             {
                 var y = Formatter.ParseYear(elements.Year);
-                if (year != null && !year.Equals(y))
+                if (!year.IsDefault && !year.Equals(y))
                     throw new FormatException("Year incoherence");
 
                 year = y;
             }
 
             // Year two digits
+            int? yearTwoDigits = null;
             if (elements.YearTwoDigits != null)
             {
-                var yearTwoDigits = Formatter.ParseYearTwoDigits(elements.YearTwoDigits);
-                if (year != null && !yearTwoDigits.Equals(year % 100))
+                yearTwoDigits = Formatter.ParseYearTwoDigits(elements.YearTwoDigits);
+                if (!year.IsDefault && !yearTwoDigits.Equals(year % 100))
                     throw new FormatException("Year incoherence");
-
-                year ??= now.Year + (yearTwoDigits - now.Year % 100);
             }
 
             // Year divided by 100
             if (elements.YearDividedBy100 != null)
             {
-                if (year == null) year = 1970;
-                else
+                int yearCentury = Formatter.ParseYearDividedBy100(elements.YearDividedBy100);
+                if(!year.IsDefault && !yearCentury.Equals(year / 100)) throw new FormatException("Incoherent year");
+
+                if (year.IsDefault && yearTwoDigits != null)
                 {
-                    var yearDivided = Formatter.ParseYearDividedBy100(elements.YearDividedBy100);
-                    if (year != null && !yearDivided.Equals(year / 100)) throw new FormatException("Incoherent year");
+                    year = int.Parse($"{yearCentury}{yearTwoDigits}");
                 }
             }
 
