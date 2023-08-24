@@ -194,18 +194,6 @@ namespace StrftimeParser
             return now;
         }
 
-        public static string ConsumeYearDividedBy100(ref string input, ref int inputIndex)
-        {
-            var res = input.Substring(inputIndex, 2);
-            inputIndex += 2;
-            return res;
-        }
-
-        public static int ParseYearDividedBy100(string input)
-        {
-            return int.Parse(input, CultureInfo.InvariantCulture);
-        }
-
         public static string ConsumeHour24(ref string input, ref int inputIndex)
         {
             var res = input.Substring(inputIndex, 2);
@@ -272,6 +260,16 @@ namespace StrftimeParser
             {
                 >= 1 and <= 366 => res,
                 _ => throw new FormatException("Invalid day of year")
+            };
+        }
+
+        public static int ParseDayOfTheMonth(string dayOfTheMonth)
+        {
+            var res = int.Parse(dayOfTheMonth, CultureInfo.InvariantCulture);
+            return res switch
+            {
+                >= 1 and <= 31 => res,
+                _ => throw new FormatException("Invalid day of the month")
             };
         }
 
@@ -418,6 +416,97 @@ namespace StrftimeParser
             var res = input.Substring(inputIndex, 4);
             inputIndex += 4;
             return res;
+        }
+
+        public string ToStringYearFull(DateTime dt)
+        {
+            return dt.ToString("yyyy", Culture);
+        }
+
+        public string ToStringYearTwoDigits(DateTime dt)
+        {
+            return dt.ToString("yy", Culture);
+        }
+
+        public string ToStringSecond(DateTime dt)
+        {
+            return dt.ToString("ss", Culture);
+        }
+
+        public string ToStringTab(DateTime _)
+        {
+            return "\t";
+        }
+
+        public string ToStringIsoTime(DateTime dt)
+        {
+            throw new NotImplementedException();
+            //return $"{ToStringHour(dt)}:{ToStringMinute(dt)}:{ToStringSecond(dt)}";
+        }
+
+        public static string ToStringIsoWeekDay(DateTime dt)
+        {
+            return dt.DayOfWeek switch
+            {
+                DayOfWeek.Monday => "1",
+                DayOfWeek.Tuesday => "2",
+                DayOfWeek.Wednesday => "3",
+                DayOfWeek.Thursday => "4",
+                DayOfWeek.Friday => "5",
+                DayOfWeek.Saturday => "6",
+                DayOfWeek.Sunday => "7",
+                _ => throw new FormatException("Unrecognized day of week")
+            };
+        }
+
+        public static string ToStringNewLine(DateTime dt)
+        {
+            return "\n";
+        }
+
+        public string ToStringMonth(DateTime dt)
+        {
+            return dt.ToString("MM", Culture);
+        }
+
+        public string ToStringMinute(DateTime dt)
+        {
+            return dt.ToString("mm", Culture);
+        }
+
+        public string ToStringHour12(DateTime dt)
+        {
+            return dt.ToString("hh", Culture);
+        }
+
+        public static string ToStringAmPmDesignation(DateTime dt)
+        {
+            return dt.Hour switch
+            {
+                >=0 and <= 11 => "AM",
+                > 11 and <= 23 => "PM",
+                _ => throw new FormatException("Unrecognized hour number")
+            };
+        }
+
+        public string ToStringHour24(DateTime dt)
+        {
+            return dt.ToString("HH", Culture);
+        }
+
+        public string ToStringFullMonthName(DateTime dt)
+        {
+            return dt.ToString("MMMM", Culture);
+        }
+
+        public string ToStringAbbreviatedMonthName(DateTime dt)
+        {
+            return dt.ToString("MMM", Culture);
+        }
+
+        public string ToStringYearDividedBy100(DateTime dt)
+        {
+            return ((int)dt.Year / 100).ToString(Culture);
         }
     }
 }

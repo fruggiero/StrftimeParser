@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using FluentAssertions;
 using StrftimeParser;
@@ -10,28 +8,17 @@ namespace StrftimeParserTest
 {
     public class ParserTest
     {
-        private CultureInfo _culture = CultureInfo.GetCultureInfo("en-US");
+        private readonly CultureInfo _culture = CultureInfo.GetCultureInfo("en-US");
 
-        [SuppressMessage("ReSharper", "SimplifyStringInterpolation")]
-        public static IEnumerable<object[]> ShouldThrow_WhenIncoherentDayOfMonth_WithDayOfWeek_Data()
-        {
-            var now = DateTime.Now;
-            yield return new object[]
-                { $"{now.Day.ToString().PadLeft(2, '0')} {now.AddDays(1).DayOfWeek.ToString()[..3]}", "%d %a" };
-            yield return new object[]
-                { $"{now.Day.ToString().PadLeft(2, ' ')} {now.AddDays(1).DayOfWeek.ToString()[..3]}", "%e %a" };
-            yield return new object[]
-                { $"{now.Day.ToString().PadLeft(2, ' ')} {now.AddDays(1).DayOfWeek.ToString()}", "%e %A" };
-        }
-
-        [Theory, MemberData(nameof(ShouldThrow_WhenIncoherentDayOfMonth_WithDayOfWeek_Data))]
-        [SuppressMessage("Performance", "CA1825:Avoid zero-length array allocations")]
+        [Theory]
+        [InlineData("19 02 1990 Wed", "%e %m %Y %a")]
+        [InlineData("19 02 1990 Wednesday", "%e %m %Y %A")]
         public void ShouldThrow_WhenIncoherentDayOfMonth_WithDayOfWeek(string input, string format)
         {
             // Arrange
 
             // Act
-            Action act = () => Strftime.Parse(input, format, _culture);
+            Action act = () => Strftime.Parse(input, format, _culture, true);
             
             // Assert
             act.Should().Throw<FormatException>();
@@ -40,10 +27,10 @@ namespace StrftimeParserTest
         [Theory]
         [InlineData("11 12", "%d %e")]
         [InlineData("12 11", "%d %e")]
-        public void ShouldThrow_WhenIncoherentDayOfMonth(string input, string format)
+        public void ShouldThrow_WhenIncoherentDayOfMonth_AndCheckIsActive(string input, string format)
         {
             // Act
-            Action act = () => _ = Strftime.Parse(input, format, _culture);
+            Action act = () => _ = Strftime.Parse(input, format, _culture, true);
             
             // Assert
             act.Should().Throw<FormatException>();
@@ -67,7 +54,7 @@ namespace StrftimeParserTest
             }
             
             // Act
-            var res = Strftime.Parse(input, format, _culture);
+            var res = Strftime.Parse(input, format, _culture, true);
             
             // Assert
             res.Day.Should().Be(now.Day);
@@ -82,7 +69,7 @@ namespace StrftimeParserTest
             // arrange
 
             // act
-            Action act = () => _ = Strftime.Parse(input, format, _culture);
+            Action act = () => _ = Strftime.Parse(input, format, _culture, true);
         
             // assert
             act.Should().ThrowExactly<FormatException>();
@@ -155,22 +142,6 @@ namespace StrftimeParserTest
         }
 
         [Theory]
-        [InlineData("20", "%C", 1970)]
-        [InlineData("23", "%C", 1970)]
-        [InlineData("19", "%C", 1970)]
-        [InlineData("03", "%C", 1970)]
-        [InlineData("20 2023", "%C %Y", 2023)]
-        [InlineData("19 1975", "%C %Y", 1975)]
-        [InlineData("20 23", "%C %y", 2023)]
-        [InlineData("19 23", "%C %y", 1923)]
-        public void ParseYearDividedBy100(string input, string format, int expectedYear)
-        {
-            var res = Strftime.Parse(input, format, _culture);
-
-            res.Should().HaveYear(expectedYear);
-        }
-
-        [Theory]
         [InlineData("00", "%H", 0)]
         [InlineData("01", "%H", 1)]
         [InlineData("02", "%H", 2)]
@@ -214,6 +185,10 @@ namespace StrftimeParserTest
         }
 
         [Theory]
+        [InlineData("AM 01", "%p %I", 1)]
+        [InlineData("AM 12", "%p %I", 0)]
+        [InlineData("PM 12", "%p %I", 12)]
+        [InlineData("PM 01", "%p %I", 13)]
         [InlineData("01 AM", "%I %p", 1)]
         [InlineData("02 AM", "%I %p", 2)]
         [InlineData("03 AM", "%I %p", 3)]
@@ -247,18 +222,16 @@ namespace StrftimeParserTest
         }
 
         [Theory]
-        [InlineData("366", "%j", 366)]
-        [InlineData("150", "%j", 150)]
-        [InlineData("001", "%j", 1)]
-        public void ParseDayOfTheYear(string input, string format, int dayOfYear)
+        [InlineData("365", "%j", 365, 1900)]
+        [InlineData("366", "%j", 1, 1901)]
+        [InlineData("150", "%j", 150, 1900)]
+        [InlineData("001", "%j", 1, 1900)]
+        public void ParseDayOfTheYear(string input, string format, int dayOfYear, int year)
         {
-            var now = DateTime.Now.AddDays(dayOfYear - DateTime.Now.DayOfYear);
-            
             var res = Strftime.Parse(input, format, _culture);
-
-            res.Should().HaveDay(now.Day);
-            res.Should().HaveMonth(now.Month);
-            res.Should().HaveYear(now.Year);
+            
+            res.DayOfYear.Should().Be(dayOfYear);
+            res.Year.Should().Be(year);
         }
         
         [Theory]
@@ -384,7 +357,7 @@ namespace StrftimeParserTest
         [InlineData("2024 23", "%Y %y")]
         public void ShouldThrow_WhenIncoherentYear(string input, string format)
         {
-            Action act = () => Strftime.Parse(input, format, _culture);
+            Action act = () => Strftime.Parse(input, format, _culture, true);
 
             act.Should().Throw<Exception>();
         }
@@ -397,36 +370,9 @@ namespace StrftimeParserTest
         [InlineData("12 GM", "%I %p")]
         public void ShouldThrow_When_Invalid12Hour(string input, string format)
         {
-            Action act = () => Strftime.Parse(input, format, _culture);
+            Action act = () => Strftime.Parse(input, format, _culture, true);
 
             act.Should().Throw<Exception>();
-        }
-        
-        [Theory]
-        [InlineData("Mon", "%a", DayOfWeek.Monday)]
-        [InlineData("Monday", "%A", DayOfWeek.Monday)]
-        [InlineData("Tue", "%a", DayOfWeek.Tuesday)]
-        [InlineData("Wed", "%a", DayOfWeek.Wednesday)]
-        [InlineData("Thu", "%a", DayOfWeek.Thursday)]
-        [InlineData("Fri", "%a", DayOfWeek.Friday)]
-        [InlineData("Sat", "%a", DayOfWeek.Saturday)]
-        [InlineData("Sun", "%a", DayOfWeek.Sunday)]
-        [InlineData("Monday Mon", "%A %a", DayOfWeek.Monday)]
-        public void Return_DayOfWeek_ForThisWeek_WhenNot_PreciseInfo_AreGiven(string input, string format, DayOfWeek dayOfWeek)
-        {
-            // arrange
-            var now = DateTime.Now;
-            var firstDayOfWeek = _culture.DateTimeFormat.FirstDayOfWeek;
-            while (now.DayOfWeek != firstDayOfWeek) now = now.AddDays(-1);
-            while (now.DayOfWeek != dayOfWeek) now = now.AddDays(1);
-            
-            // act
-            var dt = Strftime.Parse(input, format, _culture);
-        
-            // assert
-            dt.Should().HaveDay(now.Day);
-            dt.Should().HaveMonth(now.Month);
-            dt.Should().HaveYear(now.Year);
         }
 
         [Theory]

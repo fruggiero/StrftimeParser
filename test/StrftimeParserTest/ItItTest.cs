@@ -28,11 +28,9 @@ namespace StrftimeParserTest
             
             // act
             var dt = Strftime.Parse(input, format, _culture);
-        
+            
             // assert
-            dt.Should().HaveDay(now.Day);
-            dt.Should().HaveMonth(now.Month);
-            dt.Should().HaveYear(now.Year);
+            dt.DayOfWeek.Should().Be(dayOfWeek);
         }
 
         [Theory]
@@ -55,9 +53,7 @@ namespace StrftimeParserTest
             var dt = Strftime.Parse(input, format, _culture);
         
             // assert
-            dt.Should().HaveDay(now.Day);
-            dt.Should().HaveMonth(now.Month);
-            dt.Should().HaveYear(now.Year);
+            dt.DayOfWeek.Should().Be(dayOfWeek);
         }
 
         [Theory]
