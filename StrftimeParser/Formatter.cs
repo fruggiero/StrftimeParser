@@ -441,7 +441,6 @@ namespace StrftimeParser
         public string ToStringIsoTime(DateTime dt)
         {
             throw new NotImplementedException();
-            //return $"{ToStringHour(dt)}:{ToStringMinute(dt)}:{ToStringSecond(dt)}";
         }
 
         public static string ToStringIsoWeekDay(DateTime dt)
@@ -506,7 +505,62 @@ namespace StrftimeParser
 
         public string ToStringYearDividedBy100(DateTime dt)
         {
-            return ((int)dt.Year / 100).ToString(Culture);
+            return (dt.Year / 100).ToString(Culture);
+        }
+
+        public string ToStringDateAndTime(DateTime dt)
+        {
+            return dt.ToString("ddd MMM dd HH:mm:ss yyyy", Culture);
+        }
+
+        public string ToStringAbbreviatedWeekDayName(DateTime dt)
+        {
+            return dt.ToString("ddd", Culture);
+        }
+
+        public string ToStringFullWeekDayName(DateTime dt)
+        {
+            return dt.ToString("dddd", Culture);
+        }
+
+        public string ToStringDaySpacePadded(DateTime dt)
+        {
+            return dt.Day.ToString("d", Culture).PadLeft(2, ' ');
+        }
+
+        public string ToStringDayZeroPadded(DateTime dt)
+        {
+            return dt.ToString("dd", Culture);
+        }
+
+        public string ToStringShortMmDdYy(DateTime dt)
+        {
+            return $"{ToStringMonth(dt)}/{ToStringDayZeroPadded(dt)}/{ToStringYearTwoDigits(dt)}";
+        }
+
+        public string ToStringShortYyyyMmDd(DateTime dt)
+        {
+            return $"{ToStringYearFull(dt)}-{ToStringMonth(dt)}-{ToStringDayZeroPadded(dt)}";
+        }
+
+        public string ToStringDayOfTheYear(DateTime dt)
+        {
+            return dt.DayOfYear.ToString(Culture).PadLeft(3, '0');
+        }
+
+        public string ToStringWeekDaySundayBased(DateTime dt)
+        {
+            return dt.DayOfWeek switch
+            {
+                DayOfWeek.Sunday => "0",
+                DayOfWeek.Monday => "1",
+                DayOfWeek.Tuesday => "2",
+                DayOfWeek.Wednesday => "3",
+                DayOfWeek.Thursday => "4",
+                DayOfWeek.Friday => "5",
+                DayOfWeek.Saturday => "6",
+                _ => throw new FormatException("Unrecognized day of week")
+            };
         }
     }
 }

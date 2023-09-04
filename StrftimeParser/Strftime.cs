@@ -90,81 +90,32 @@ namespace StrftimeParser
                                     builder.Append(formatter.ToStringYearDividedBy100(dt));
                                     break;
                                 case 'c':
-                                    throw new NotImplementedException();
+                                    builder.Append(formatter.ToStringDateAndTime(dt));
+                                    break;
                                 case 'a':
-                                    throw new NotImplementedException();
-                                    //{
-                                    //    var weekDay = formatter
-                                    //        .ConsumeAbbreviatedDayOfWeek(ref input, ref inputIndex);
-                                    //    if (res.AbbrWeekDay != null && !weekDay.Equals(res.AbbrWeekDay))
-                                    //        throw new FormatException("%a format incoherence");
-                                    //    res.AbbrWeekDay = weekDay;
-                                    //    break;
-                                    //}
+                                    builder.Append(formatter.ToStringAbbreviatedWeekDayName(dt));
+                                    break;
                                 case 'A':
-                                    throw new NotImplementedException();
-                                    //{
-                                    //    var weekDay = formatter.ConsumeDayOfWeek(ref input, ref inputIndex);
-                                    //    if (res.FullWeekDay != null && !weekDay.Equals(res.FullWeekDay))
-                                    //        throw new FormatException("%A format incoherence");
-                                    //    res.FullWeekDay = weekDay;
-                                    //    break;
-                                    //}
+                                    builder.Append(formatter.ToStringFullWeekDayName(dt));
+                                    break;
                                 case 'd':
-                                    throw new NotImplementedException();
-                                    //{
-                                    //    var dayOfTheMonth = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                    //    if (res.DayOfTheMonthZeroPadded != null &&
-                                    //        !dayOfTheMonth.Equals(res.DayOfTheMonthZeroPadded))
-                                    //        throw new FormatException("%d format incoherence");
-                                    //    res.DayOfTheMonthZeroPadded = dayOfTheMonth;
-                                    //    break;
-                                    //}
+                                    builder.Append(formatter.ToStringDayZeroPadded(dt));
+                                    break;
                                 case 'e':
-                                    throw new NotImplementedException();
-                                    //{
-                                    //    var dayOfTheMonth = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                    //    if (res.DayOfTheMonthSpacePadded != null &&
-                                    //        !dayOfTheMonth.Equals(res.DayOfTheMonthSpacePadded))
-                                    //        throw new FormatException("%e format incoherence");
-                                    //    res.DayOfTheMonthSpacePadded = dayOfTheMonth;
-                                    //    break;
-                                    //}
+                                    builder.Append(formatter.ToStringDaySpacePadded(dt));
+                                    break;
                                 case 'D':
-                                    throw new NotImplementedException();
-                                    //{
-                                    //    var shortMmDdYy = Formatter.ConsumeShortMmDdYy(input, ref inputIndex);
-                                    //    if (res.ShortMmDdYy != null && !res.ShortMmDdYy.Equals(shortMmDdYy))
-                                    //        throw new FormatException("%D format incoherence");
-                                    //    res.ShortMmDdYy = shortMmDdYy;
-                                    //    break;
-                                    //}
+                                    builder.Append(formatter.ToStringShortMmDdYy(dt));
+                                    break;
                                 case 'F':
-                                    throw new NotImplementedException();
-                                    //{
-                                    //    var shortYyyyMmDd = Formatter.ConsumeShortYyyyMmDd(input, ref inputIndex);
-                                    //    if (res.ShortYyyyMmDd != null && !res.ShortYyyyMmDd.Equals(shortYyyyMmDd))
-                                    //        throw new FormatException("%F format incoherence");
-                                    //    res.ShortYyyyMmDd = shortYyyyMmDd;
-                                    //    break;
-                                    //}
+                                    builder.Append(formatter.ToStringShortYyyyMmDd(dt));
+                                    break;
                                 case 'j':
-                                    throw new NotImplementedException();
-                                    //var dayOfYear = Formatter.ConsumeDayOfYear(input, ref inputIndex);
-                                    //if (res.DayOfYear != null && !res.DayOfYear.Equals(dayOfYear))
-                                    //    throw new FormatException("%j format incoherence");
-                                    //res.DayOfYear = dayOfYear;
-                                    //break;
+                                    builder.Append(formatter.ToStringDayOfTheYear(dt));
+                                    break;
                                 case 'w':
-                                    throw new NotImplementedException();
-                                    //var weekDaySundayBased =
-                                    //    Formatter.ConsumeWeekDaySundayBased(input, ref inputIndex);
-                                    //if (res.WeekDaySundayBased != null &&
-                                    //    !res.WeekDaySundayBased.Equals(weekDaySundayBased))
-                                    //    throw new FormatException("%w format incoherence");
-
-                                    //res.WeekDaySundayBased = weekDaySundayBased;
-                                    //break;
+                                    builder.Append(formatter.ToStringWeekDaySundayBased(dt));
+                                    break;
                                 default:
                                     throw new FormatException($"Unrecognized format: %{format[formatIndex]}");
                             }
