@@ -2,10 +2,13 @@
 
 # StrftimeParser
 
-StrftimeParser is a .NET Standard 2.0 library that allows you to work with C-style strftime string formats within .NET.
+StrftimeParser is a .NET Standard 2.0 library that allows you to work with C-style strftime/strptime string formats within .NET.
 
-The project provides a main class called `Strftime` that exposes a static method `Parse`, which allows to convert a 
-formatted string to a DateTime object
+The project provides a main class called `Strftime` that exposes a static method `Parse`, and a static method `ToString`.
+
+The `Parse` method is the equivalent of the `strptime` in `time.h` of C language, as it allows to obtain a DateTime object given a format specifier and a formatted date string.
+
+The `ToString` method is the equivalent of the `strftime` in `time.h` of C language, as it allows to obtain a formatted date string, given a format specifier and a DateTime object
 
 ## Usage
 
@@ -15,15 +18,13 @@ To use StrftimeParser in your .NET project, follow these simple steps:
 
 2. Import the StrftimeParser namespace in your code file.
 
-3. Call the static method Parse of the Strftime class and pass a string in the C-style strftime format as a parameter, plus the format used.
+3. Now call the `Parse` or the `ToString` method
 
-4. Use the DateTime object returned by the Parse method to manipulate the formatted date.
 
-Here an example of code:
+### Here an example of `Parse`:
 
 ```
 using StrftimeParser;
-
 
 string strftimeString = "2001-08-23 14:55:02";
 string formatSpecifier = "%Y-%m-%d %H:%M:%S";
@@ -34,7 +35,20 @@ DateTime dateTime = Strftime.Parse(strftimeString, formatSpecifier);
 
 ```
 
-## How to Use a specified CultureInfo
+### Here an example of `ToString`:
+
+```
+using StrftimeParser;
+
+var dt = new DateTime(1970, 1, 2, 3, 4, 5);
+var format = "%c";
+
+var res = Strftime.ToString(dt, format);
+
+// res now contains the formatted date string
+```
+
+## How to use a specified CultureInfo when parsing
 
 To execute the parsing with a specific Culture, you can pass
 a CultureInfo instance to the `Parse` method:
@@ -43,6 +57,17 @@ a CultureInfo instance to the `Parse` method:
 DateTime dateTime = Strftime.Parse(strftimeString, formatSpecifier, CultureInfo.GetCultureInfo("it-IT"));
 
 // dateTime now contains the formatted date as a .NET DateTime object
+```
+
+## How to use a specified CultureInfo when converting to string
+
+To execute the parsing with a specific Culture, you can pass
+a CultureInfo instance to the `ToString` method:
+
+```
+var result = Strftime.ToString(dt, formatSpecifier, CultureInfo.GetCultureInfo("it-IT"));
+
+// result now contains the formatted string
 ```
 
 ## Compatibility
