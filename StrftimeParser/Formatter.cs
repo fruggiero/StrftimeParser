@@ -440,7 +440,7 @@ namespace StrftimeParser
 
         public string ToStringIsoTime(DateTime dt)
         {
-            throw new NotImplementedException();
+            return $"{ToStringHour24(dt)}:{ToStringMinute(dt)}:{ToStringSecond(dt)}";
         }
 
         public static string ToStringIsoWeekDay(DateTime dt)
