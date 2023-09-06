@@ -161,9 +161,9 @@ namespace StrftimeParser
             var dayOfWeekAssigned = false;
             string amPm = null;
             int? hour12 = null;
-            for (var inputIndex = 0; inputIndex < input.Length; inputIndex++)
+            for (int inputIndex = 0, formatIndex = 0; inputIndex < input.Length && formatIndex < format.Length; inputIndex++)
             {
-                for (var formatIndex = 0; formatIndex < format.Length; formatIndex++)
+                for (; formatIndex < format.Length; formatIndex++)
                 {
                     switch (format[formatIndex])
                     {

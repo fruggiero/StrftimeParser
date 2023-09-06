@@ -43,5 +43,19 @@ namespace StrftimeParserTest
 
             res.Should().Be(expectedResult);
         }
+
+        
+        [Theory]
+        [InlineData("asd %Y asd", "asd 1970 asd")]
+        [InlineData("asd %Y", "asd 1970")]
+        [InlineData("%Y asd", "1970 asd")]
+        public void Should_LeaveExtraChars(string format, string expectedResult)
+        {
+            var dt = new DateTime(1970, 1, 2, 3, 4, 5);
+
+            var res = Strftime.ToString(dt, format, _culture);
+
+            res.Should().Be(expectedResult);
+        }
     }
 }

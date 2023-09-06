@@ -408,5 +408,14 @@ namespace StrftimeParserTest
             dt.Should().HaveMinute(47);
             dt.Should().HaveSecond(09);
         }
+
+        [Theory]
+        [InlineData("2023-08-07T17:47:09: Some extra values", "%Y-%m-%dT%H:%M:%S")]
+        public void Parse_IgnoreExtraValues_NotOnFormat(string input ,string format)
+        {
+            Action act = () => Strftime.Parse(input, format, _culture);
+
+            act.Should().NotThrow();
+        }
     }
 }
