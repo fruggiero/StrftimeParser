@@ -123,7 +123,7 @@ namespace StrftimeParser.Formatters
                 {
                     // Parse February
                     var fullMonth = input.Substring(inputIndex, "February".Length);
-                    inputIndex += "January".Length;
+                    inputIndex += "February".Length;
                     return fullMonth;
                 }
                 case 'm':
