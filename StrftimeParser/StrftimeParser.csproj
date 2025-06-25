@@ -9,4 +9,12 @@
       <Folder Include="Formatters\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <InternalsVisibleTo Include="StrftimeParser.Benchmark" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Memory" Version="4.6.3" />
+    </ItemGroup>
+
 </Project>

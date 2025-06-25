@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
@@ -10,6 +10,8 @@ namespace StrftimeParser
 {
     public static class Strftime
     {
+        private static readonly ConcurrentDictionary<string, Formatter> FormatterCache = new();
+
         /// <summary>
         /// Convert a strftime-formatted string into a DateTime object.
         /// For the conversion, the current culture is used.
@@ -17,7 +19,7 @@ namespace StrftimeParser
         /// <param name="input">The string which contains the formatted date</param>
         /// <param name="format">A format specifier</param>
         /// <returns>A DateTime object</returns>
-        /// <exception cref="FormatException">There is something wrong with the formatted date</exception>
+        /// <exception cref="FormatException">There is something wrong with the provided input</exception>
         /// <exception cref="ArgumentOutOfRangeException">There is something wrong with the formatted date</exception>
         public static DateTime Parse(string input, string format) => Parse(input, format, CultureInfo.CurrentCulture);
 
@@ -25,12 +27,7 @@ namespace StrftimeParser
 
         public static string ToString(DateTime dt, string format, CultureInfo culture)
         {
-            Formatter formatter = culture.Name switch
-            {
-                "en-US" => new EnUsFormatter(),
-                _ => new GenericFormatter(culture)
-            };
-
+            var formatter = GetFormatter(culture);
             var builder = new StringBuilder();
 
             for (var formatIndex = 0; formatIndex < format.Length; formatIndex++)
@@ -139,17 +136,13 @@ namespace StrftimeParser
         /// <param name="culture">A culture-info used for the conversion</param>
         /// <param name="coherenceCheck">Throw exception on incoherence found</param>
         /// <returns>A DateTime object</returns>
-        /// <exception cref="FormatException">There is something wrong with the formatted date</exception>
+        /// <exception cref="FormatException">There is something wrong with the provided input</exception>
         /// <exception cref="ArgumentOutOfRangeException">There is something wrong with the formatted date</exception>
         [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
         public static DateTime Parse(string input, string format, CultureInfo culture, bool coherenceCheck = false)
         {
-            Formatter formatter = culture.Name switch
-            {
-                "en-US" => new EnUsFormatter(),
-                _ => new GenericFormatter(culture)
-            };
-
+            var inputSpan = input.AsSpan();
+            var formatter = GetFormatter(culture);
             var res = new DateTime(1900, 1, 1, 0, 0, 0);
             var now = DateTime.Now;
             var yearAssigned = false;
@@ -179,7 +172,7 @@ namespace StrftimeParser
                                         break;
                                     case 'Y':
                                     {
-                                        var y = Formatter.ConsumeYearFull(ref input, ref inputIndex);
+                                        var y = Formatter.ConsumeYearFull(ref inputSpan, ref inputIndex);
                                         var yVal = Formatter.ParseYear(y);
                                         if (coherenceCheck)
                                         {
@@ -192,7 +185,7 @@ namespace StrftimeParser
                                     }
                                     case 'y':
                                     {
-                                        var y = Formatter.ConsumeYearTwoDigits(ref input, ref inputIndex);
+                                        var y = Formatter.ConsumeYearTwoDigits(ref inputSpan, ref inputIndex);
                                         var intVal = Formatter.ParseYearTwoDigits(y);
                                         var yVal = (now.Year / 100) * 100 + intVal;
                                         if (coherenceCheck)
@@ -206,7 +199,7 @@ namespace StrftimeParser
                                     }
                                     case 'S':
                                     {
-                                        var s = Formatter.ConsumeSecond(ref input, ref inputIndex);
+                                        var s = Formatter.ConsumeSecond(ref inputSpan, ref inputIndex);
                                         var sVal = Formatter.ParseSecond(s);
                                         if (coherenceCheck)
                                         {
@@ -218,11 +211,11 @@ namespace StrftimeParser
                                         break;
                                     }
                                     case 't':
-                                        _ = Formatter.ConsumeTab(ref input, ref inputIndex);
+                                        _ = Formatter.ConsumeTab(ref inputSpan, ref inputIndex);
                                         break;
                                     case 'T':
                                     {
-                                        var isoTime = Formatter.ConsumeIsoTime(ref input, ref inputIndex);
+                                        var isoTime = Formatter.ConsumeIsoTime(ref inputSpan, ref inputIndex);
 
                                         var (h, m, s) = Formatter.ParseIsoTime(isoTime);
 
@@ -249,7 +242,7 @@ namespace StrftimeParser
                                     }
                                     case 'u':
                                     {
-                                        var isoWeekDay = Formatter.ConsumeIsoWeekDay(ref input, ref inputIndex);
+                                        var isoWeekDay = Formatter.ConsumeIsoWeekDay(ref inputSpan, ref inputIndex);
                                         var weekDay = FromIsoWeekDay(Formatter.ParseIsoWeekDay(isoWeekDay));
 
                                         if (coherenceCheck)
@@ -265,11 +258,11 @@ namespace StrftimeParser
                                         break;
                                     }
                                     case 'n':
-                                        _ = Formatter.ConsumeNewLine(ref input, ref inputIndex);
+                                        _ = Formatter.ConsumeNewLine(ref inputSpan, ref inputIndex);
                                         break;
                                     case 'm':
                                     {
-                                        var m = Formatter.ConsumeMonth(ref input, ref inputIndex);
+                                        var m = Formatter.ConsumeMonth(ref inputSpan, ref inputIndex);
                                         var mVal = Formatter.ParseMonth(m);
                                         if (coherenceCheck)
                                         {
@@ -283,7 +276,7 @@ namespace StrftimeParser
                                     }
                                     case 'M':
                                     {
-                                        var m = Formatter.ConsumeMinute(ref input, ref inputIndex);
+                                        var m = Formatter.ConsumeMinute(ref inputSpan, ref inputIndex);
                                         var mVal = Formatter.ParseMinute(m);
                                         if (coherenceCheck)
                                         {
@@ -297,7 +290,7 @@ namespace StrftimeParser
                                     }
                                     case 'I':
                                     {
-                                        var s = Formatter.ConsumeHour12(ref input, ref inputIndex);
+                                        var s = Formatter.ConsumeHour12(ref inputSpan, ref inputIndex);
                                         var v = Formatter.ParseHour12(s);
 
                                         if (coherenceCheck)
@@ -322,7 +315,7 @@ namespace StrftimeParser
                                     }
                                     case 'p':
                                     {
-                                        var consumed = Formatter.ConsumeAmPmDesignation(ref input, ref inputIndex);
+                                        var consumed = Formatter.ConsumeAmPmDesignation(ref inputSpan, ref inputIndex);
                                         var v = Formatter.ParseAmPmDesignation(consumed);
 
                                         if (coherenceCheck)
@@ -354,7 +347,7 @@ namespace StrftimeParser
                                     }
                                     case 'H':
                                     {
-                                        var s = Formatter.ConsumeHour24(ref input, ref inputIndex);
+                                        var s = Formatter.ConsumeHour24(ref inputSpan, ref inputIndex);
                                         var v = Formatter.ParseHour24(s);
 
                                         if (coherenceCheck)
@@ -369,7 +362,7 @@ namespace StrftimeParser
                                     }
                                     case 'B':
                                     {
-                                        var s = formatter.ConsumeFullMonth(ref input, ref inputIndex);
+                                        var s = formatter.ConsumeFullMonth(ref inputSpan, ref inputIndex);
                                         var v = formatter.ParseMonthFull(s);
                                         if (coherenceCheck)
                                         {
@@ -383,7 +376,7 @@ namespace StrftimeParser
                                     }
                                     case 'b':
                                     {
-                                        var s = formatter.ConsumeAbbreviatedMonth(ref input, ref inputIndex);
+                                        var s = formatter.ConsumeAbbreviatedMonth(ref inputSpan, ref inputIndex);
                                         var v = formatter.ParseMonthAbbreviated(s);
                                         if (coherenceCheck)
                                         {
@@ -397,31 +390,31 @@ namespace StrftimeParser
                                     }
                                     case 'c':
                                     {
-                                        var abbreviatedDayOfWeek = formatter.ConsumeAbbreviatedDayOfWeek(ref input, ref inputIndex);
+                                        var abbreviatedDayOfWeek = formatter.ConsumeAbbreviatedDayOfWeek(ref inputSpan, ref inputIndex);
                                         var weekDayVal = formatter.ParseDayOfWeekAbbreviated(abbreviatedDayOfWeek);
                                         inputIndex++;
 
-                                        var abbrMonth = formatter.ConsumeAbbreviatedMonth(ref input, ref inputIndex);
+                                        var abbrMonth = formatter.ConsumeAbbreviatedMonth(ref inputSpan, ref inputIndex);
                                         var abbrMonthVal = formatter.ParseMonthAbbreviated(abbrMonth);
                                         inputIndex++;
 
-                                        var d = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                        var dayOfTheMonthVal = Formatter.ParseDayOfTheMonth(d);
+                                        var d = Formatter.ConsumeDayOfTheMonth(inputSpan, ref inputIndex);
+                                        var dayOfTheMonthVal = Formatter.ParseDayOfTheMonthFlexible(d);
                                         inputIndex++;
                                         
-                                        var h = Formatter.ConsumeHour24(ref input, ref inputIndex);
+                                        var h = Formatter.ConsumeHour24(ref inputSpan, ref inputIndex);
                                         var hourVal = Formatter.ParseHour24(h);
                                         inputIndex++;
 
-                                        var m = Formatter.ConsumeMinute(ref input, ref inputIndex);
+                                        var m = Formatter.ConsumeMinute(ref inputSpan, ref inputIndex);
                                         var minuteVal = Formatter.ParseMinute(m);
                                         inputIndex++;
 
-                                        var s = Formatter.ConsumeSecond(ref input, ref inputIndex);
+                                        var s = Formatter.ConsumeSecond(ref inputSpan, ref inputIndex);
                                         var secondVal = Formatter.ParseSecond(s);
                                         inputIndex++;
 
-                                        var y = Formatter.ConsumeYearFull(ref input, ref inputIndex);
+                                        var y = Formatter.ConsumeYearFull(ref inputSpan, ref inputIndex);
                                         var yearVal = Formatter.ParseYear(y);
 
                                         if (coherenceCheck)
@@ -464,7 +457,7 @@ namespace StrftimeParser
                                     }
                                     case 'a':
                                     {
-                                        var weekDay = formatter.ConsumeAbbreviatedDayOfWeek(ref input, ref inputIndex);
+                                        var weekDay = formatter.ConsumeAbbreviatedDayOfWeek(ref inputSpan, ref inputIndex);
                                         var weekDayVal = formatter.ParseDayOfWeekAbbreviated(weekDay);
                                         if (coherenceCheck)
                                         {
@@ -481,7 +474,7 @@ namespace StrftimeParser
                                     }
                                     case 'A':
                                     {
-                                        var d = formatter.ConsumeDayOfWeek(ref input, ref inputIndex);
+                                        var d = formatter.ConsumeDayOfWeek(ref inputSpan, ref inputIndex);
                                         var v = formatter.ParseDayOfWeekFull(d);
                                         if (coherenceCheck)
                                         {
@@ -497,8 +490,8 @@ namespace StrftimeParser
                                     }
                                     case 'd':
                                     {
-                                        var d = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                        var v = Formatter.ParseDayOfTheMonth(d);
+                                        var d = Formatter.ConsumeDayOfTheMonth(inputSpan, ref inputIndex);
+                                        var v = Formatter.ParseDayOfTheMonthZeroPadded(d);
                                         if (coherenceCheck)
                                         {
                                             if (dayAssigned && !res.Day.Equals(v))
@@ -511,8 +504,8 @@ namespace StrftimeParser
                                     }
                                     case 'e':
                                     {
-                                        var d = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                        var v = Formatter.ParseDayOfTheMonth(d);
+                                        var d = Formatter.ConsumeDayOfTheMonth(inputSpan, ref inputIndex);
+                                        var v = Formatter.ParseDayOfTheMonthSpacePadded(d);
                                         if (coherenceCheck)
                                         {
                                             if (dayAssigned && !res.Day.Equals(v))
@@ -525,15 +518,15 @@ namespace StrftimeParser
                                     }
                                     case 'D':
                                     {
-                                        var m = Formatter.ConsumeMonth(ref input, ref inputIndex);
+                                        var m = Formatter.ConsumeMonth(ref inputSpan, ref inputIndex);
                                         var mVal = Formatter.ParseMonth(m);
                                         inputIndex++;
 
-                                        var d = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                        var dVal = Formatter.ParseDayOfTheMonth(d);
+                                        var d = Formatter.ConsumeDayOfTheMonth(inputSpan, ref inputIndex);
+                                        var dVal = Formatter.ParseDayOfTheMonthFlexible(d);
                                         inputIndex++;
 
-                                        var y = Formatter.ConsumeYearTwoDigits(ref input, ref inputIndex);
+                                        var y = Formatter.ConsumeYearTwoDigits(ref inputSpan, ref inputIndex);
                                         var intVal = Formatter.ParseYearTwoDigits(y);
                                         var yVal = (now.Year / 100) * 100 + intVal;
 
@@ -558,16 +551,16 @@ namespace StrftimeParser
                                     }
                                     case 'F':
                                     {
-                                        var y = Formatter.ConsumeYearFull(ref input, ref inputIndex);
+                                        var y = Formatter.ConsumeYearFull(ref inputSpan, ref inputIndex);
                                         var yVal = Formatter.ParseYear(y);
                                         inputIndex++;
 
-                                        var m = Formatter.ConsumeMonth(ref input, ref inputIndex);
+                                        var m = Formatter.ConsumeMonth(ref inputSpan, ref inputIndex);
                                         var mVal = Formatter.ParseMonth(m);
                                         inputIndex++;
 
-                                        var d = Formatter.ConsumeDayOfTheMonth(input, ref inputIndex);
-                                        var dVal = Formatter.ParseDayOfTheMonth(d);
+                                        var d = Formatter.ConsumeDayOfTheMonth(inputSpan, ref inputIndex);
+                                        var dVal = Formatter.ParseDayOfTheMonthFlexible(d);
 
                                         if (coherenceCheck)
                                         {
@@ -591,7 +584,7 @@ namespace StrftimeParser
                                     }
                                     case 'j':
                                     {
-                                        var d = Formatter.ConsumeDayOfYear(input, ref inputIndex);
+                                        var d = Formatter.ConsumeDayOfYear(inputSpan, ref inputIndex);
                                         var intVal = Formatter.ParseDayOfYear(d);
                                         var dVal = new DateTime(res.Year, 1, 1).AddDays(intVal - 1);
 
@@ -612,7 +605,7 @@ namespace StrftimeParser
                                     }
                                     case 'w':
                                     {
-                                        var d = Formatter.ConsumeWeekDaySundayBased(input, ref inputIndex);
+                                        var d = Formatter.ConsumeWeekDaySundayBased(inputSpan, ref inputIndex);
                                         var v = FromWeekDaySundayBased(Formatter.ParseWeekDaySundayBased(d));
                                         if (coherenceCheck)
                                         {
@@ -639,26 +632,25 @@ namespace StrftimeParser
             return res;
         }
 
+        private static Formatter GetFormatter(CultureInfo culture)
+        {
+            return FormatterCache.GetOrAdd(culture.Name, cultureName => cultureName switch
+            {
+                "en-US" => new EnUsFormatter(),
+                _ => new GenericFormatter(culture)
+            });
+        }
+
         private static int ConvertTo12HourFormat(int hour24Hour)
         {
-            if (hour24Hour < 0 || hour24Hour > 23)
+            return hour24Hour switch
             {
                 //TODO: change exception message
-                throw new ArgumentException("L'ora fornita non è valida.");
-            }
-
-            if (hour24Hour == 0)
-            {
-                return 12;
-            }
-            else if (hour24Hour <= 12)
-            {
-                return hour24Hour;
-            }
-            else
-            {
-                return hour24Hour - 12;
-            }
+                < 0 or > 23 => throw new ArgumentException("L'ora fornita non ï¿½ valida."),
+                0 => 12,
+                <= 12 => hour24Hour,
+                _ => hour24Hour - 12
+            };
         }
 
         private static int ConvertTo24HourFormat(int hour12Hour, string amPm)
@@ -666,7 +658,7 @@ namespace StrftimeParser
             if (hour12Hour < 1 || hour12Hour > 12 || (amPm.ToUpper() != "AM" && amPm.ToUpper() != "PM"))
             {
                 //TODO: change exception message
-                throw new ArgumentException("L'ora fornita non è valida.");
+                throw new ArgumentException("L'ora fornita non ï¿½ valida.");
             }
 
             if (hour12Hour == 12 && amPm.ToUpper() == "AM")

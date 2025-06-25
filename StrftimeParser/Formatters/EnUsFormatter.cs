@@ -7,298 +7,531 @@ namespace StrftimeParser.Formatters
     {
         protected override CultureInfo Culture => CultureInfo.GetCultureInfo("en-US");
 
-        public override string ConsumeAbbreviatedDayOfWeek(ref string input, ref int inputIndex)
+        public override ReadOnlySpan<char> ConsumeAbbreviatedDayOfWeek(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var abbrWeekDay = input.Substring(inputIndex, 3);
+            var abbrWeekDay = input.Slice(inputIndex, 3);
             inputIndex += 3;
             return abbrWeekDay;
         }
-        
-        public override string ConsumeAbbreviatedMonth(ref string input, ref int inputIndex)
+
+        public override ReadOnlySpan<char> ConsumeAbbreviatedMonth(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var month = input.Substring(inputIndex, 3);
+            var month = input.Slice(inputIndex, 3);
             inputIndex += 3;
             return month;
         }
 
-        public override int ParseMonthFull(string input)
+        public override int ParseMonthFull(ReadOnlySpan<char> input)
         {
-            switch (input.ToLower())
-            {
-                case "january":
-                    return 1;
-                case "february":
-                    return 2;
-                case "march":
-                    return 3;
-                case "april":
-                    return 4;
-                case "may":
-                    return 5;
-                case "june":
-                    return 6;
-                case "july":
-                    return 7;
-                case "august":
-                    return 8;
-                case "september":
-                    return 9;
-                case "october":
-                    return 10;
-                case "november":
-                    return 11;
-                case "december":
-                    return 12;
-            }
+            if (input.Equals("january".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 1;
+            if (input.Equals("february".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 2;
+            if (input.Equals("march".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 3;
+            if (input.Equals("april".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 4;
+            if (input.Equals("may".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 5;
+            if (input.Equals("june".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 6;
+            if (input.Equals("july".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 7;
+            if (input.Equals("august".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 8;
+            if (input.Equals("september".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 9;
+            if (input.Equals("october".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 10;
+            if (input.Equals("november".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 11;
+            if (input.Equals("december".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                return 12;
 
             throw new FormatException("Unrecognized month name for this locale");
         }
 
-        public override int ParseMonthAbbreviated(string input)
+
+        public override int ParseMonthAbbreviated(ReadOnlySpan<char> input)
         {
-            return input.ToLower() switch
-            {
-                "jan" => 1,
-                "feb" => 2,
-                "mar" => 3,
-                "apr" => 4,
-                "may" => 5,
-                "jun" => 6,
-                "jul" => 7,
-                "aug" => 8,
-                "sep" => 9,
-                "oct" => 10,
-                "nov" => 11,
-                "dec" => 12,
-                _ => throw new FormatException("Unrecognized month abbreviated for this locale")
-            };
-        }
-        
-        public override string ConsumeFullMonth(ref string input, ref int inputIndex)
-        {
-            switch (input[inputIndex])
+            if (input.Length != 3)
+                throw new FormatException("Invalid abbreviated month length");
+
+            // Use bitwise OR with 0x20 for fast case-insensitive comparison
+            char c1 = (char)(input[0] | 0x20);
+            char c2 = (char)(input[1] | 0x20);
+            char c3 = (char)(input[2] | 0x20);
+
+            switch (c1)
             {
                 case 'j':
-                case 'J':
-                    switch (input[inputIndex + 1])
-                    {
-                        case 'a':
-                        case 'A':
-                        {
-                            // Parse January
-                            var fullMonth = input.Substring(inputIndex, "January".Length);
-                            inputIndex += "January".Length;
-                            return fullMonth;
-                        }
-                        case 'u':
-                        case 'U':
-                        {
-                            switch (input[inputIndex + 2])
-                            {
-                                case 'l':
-                                case 'L':
-                                {
-                                    // Parse July
-                                    var fullMonth = input.Substring(inputIndex, "July".Length);
-                                    inputIndex += "July".Length;
-                                    return fullMonth;
-                                }
-                                case 'n':
-                                case 'N':
-                                {
-                                    // Parse June
-                                    var fullMonth = input.Substring(inputIndex, "June".Length);
-                                    inputIndex += "June".Length;
-                                    return fullMonth;
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-
+                    if (c2 == 'a' && c3 == 'n') return 1; // jan
+                    if (c2 == 'u' && c3 == 'n') return 6; // jun
+                    if (c2 == 'u' && c3 == 'l') return 7; // jul
                     break;
                 case 'f':
-                case 'F':
-                {
-                    // Parse February
-                    var fullMonth = input.Substring(inputIndex, "February".Length);
-                    inputIndex += "February".Length;
-                    return fullMonth;
-                }
+                    if (c2 == 'e' && c3 == 'b') return 2; // feb
+                    break;
                 case 'm':
-                case 'M':
-                {
-                    switch (input[inputIndex + 2])
-                    {
-                        case 'r':
-                        case 'R':
-                        {
-                            // Parse March:
-                            var fullMonth = input.Substring(inputIndex, "March".Length);
-                            inputIndex += "March".Length;
-                            return fullMonth;
-                        }
-                        case 'Y':
-                        case 'y':
-                        {
-                            // Parse May:
-                            var fullMonth = input.Substring(inputIndex, "May".Length);
-                            inputIndex += "May".Length;
-                            return fullMonth;
-                        }
-                    }
+                    if (c2 == 'a' && c3 == 'r') return 3; // mar
+                    if (c2 == 'a' && c3 == 'y') return 5; // may
                     break;
-                }
-                case 'A':
                 case 'a':
-                    switch (input[inputIndex + 1])
+                    if (c2 == 'p' && c3 == 'r') return 4; // apr
+                    if (c2 == 'u' && c3 == 'g') return 8; // aug
+                    break;
+                case 's':
+                    if (c2 == 'e' && c3 == 'p') return 9; // sep
+                    break;
+                case 'o':
+                    if (c2 == 'c' && c3 == 't') return 10; // oct
+                    break;
+                case 'n':
+                    if (c2 == 'o' && c3 == 'v') return 11; // nov
+                    break;
+                case 'd':
+                    if (c2 == 'e' && c3 == 'c') return 12; // dec
+                    break;
+            }
+
+            throw new FormatException("Unrecognized month abbreviated for this locale");
+        }
+
+
+        public override ReadOnlySpan<char> ConsumeFullMonth(ref ReadOnlySpan<char> input, ref int inputIndex)
+        {
+            if (inputIndex >= input.Length)
+                throw new FormatException("Unexpected end of input");
+
+            char firstChar = (char)(input[inputIndex] | 0x20); // Fast lowercase conversion
+
+            switch (firstChar)
+            {
+                case 'j':
+                    if (inputIndex + 1 < input.Length)
                     {
-                        case 'p':
-                        case 'P':
+                        char secondChar = (char)(input[inputIndex + 1] | 0x20);
+                        switch (secondChar)
                         {
-                            // Parse April:
-                            var fullMonth = input.Substring(inputIndex, "April".Length);
-                            inputIndex += "April".Length;
-                            return fullMonth;
-                        }
-                        case 'u':
-                        case 'U':
-                        {
-                            // Parse August:
-                            var fullMonth = input.Substring(inputIndex, "August".Length);
-                            inputIndex += "August".Length;
-                            return fullMonth;
+                            case 'a':
+                                // January
+                                if (CheckStringMatch(input, inputIndex, "january"))
+                                {
+                                    var result = input.Slice(inputIndex, 7);
+                                    inputIndex += 7;
+                                    return result;
+                                }
+
+                                break;
+                            case 'u':
+                                if (inputIndex + 2 < input.Length)
+                                {
+                                    char thirdChar = (char)(input[inputIndex + 2] | 0x20);
+                                    switch (thirdChar)
+                                    {
+                                        case 'l':
+                                            // July
+                                            if (CheckStringMatch(input, inputIndex, "july"))
+                                            {
+                                                var result = input.Slice(inputIndex, 4);
+                                                inputIndex += 4;
+                                                return result;
+                                            }
+
+                                            break;
+                                        case 'n':
+                                            // June
+                                            if (CheckStringMatch(input, inputIndex, "june"))
+                                            {
+                                                var result = input.Slice(inputIndex, 4);
+                                                inputIndex += 4;
+                                                return result;
+                                            }
+
+                                            break;
+                                    }
+                                }
+
+                                break;
                         }
                     }
+
                     break;
-                case 'S':
+
+                case 'f':
+                    // February
+                    if (CheckStringMatch(input, inputIndex, "february"))
+                    {
+                        var result = input.Slice(inputIndex, 8);
+                        inputIndex += 8;
+                        return result;
+                    }
+
+                    break;
+
+                case 'm':
+                    if (inputIndex + 2 < input.Length)
+                    {
+                        char thirdChar = (char)(input[inputIndex + 2] | 0x20);
+                        switch (thirdChar)
+                        {
+                            case 'r':
+                                // March
+                                if (CheckStringMatch(input, inputIndex, "march"))
+                                {
+                                    var result = input.Slice(inputIndex, 5);
+                                    inputIndex += 5;
+                                    return result;
+                                }
+
+                                break;
+                            case 'y':
+                                // May
+                                if (CheckStringMatch(input, inputIndex, "may"))
+                                {
+                                    var result = input.Slice(inputIndex, 3);
+                                    inputIndex += 3;
+                                    return result;
+                                }
+
+                                break;
+                        }
+                    }
+
+                    break;
+
+                case 'a':
+                    if (inputIndex + 1 < input.Length)
+                    {
+                        char secondChar = (char)(input[inputIndex + 1] | 0x20);
+                        switch (secondChar)
+                        {
+                            case 'p':
+                                // April
+                                if (CheckStringMatch(input, inputIndex, "april"))
+                                {
+                                    var result = input.Slice(inputIndex, 5);
+                                    inputIndex += 5;
+                                    return result;
+                                }
+
+                                break;
+                            case 'u':
+                                // August
+                                if (CheckStringMatch(input, inputIndex, "august"))
+                                {
+                                    var result = input.Slice(inputIndex, 6);
+                                    inputIndex += 6;
+                                    return result;
+                                }
+
+                                break;
+                        }
+                    }
+
+                    break;
+
                 case 's':
-                {
-                    // Parse September:
-                    var fullMonth = input.Substring(inputIndex, "September".Length);
-                    inputIndex += "September".Length;
-                    return fullMonth;
-                }
-                case 'O':
+                    // September
+                    if (CheckStringMatch(input, inputIndex, "september"))
+                    {
+                        var result = input.Slice(inputIndex, 9);
+                        inputIndex += 9;
+                        return result;
+                    }
+
+                    break;
+
                 case 'o':
-                {
-                    // Parse October:
-                    var fullMonth = input.Substring(inputIndex, "October".Length);
-                    inputIndex += "October".Length;
-                    return fullMonth;
-                }
-                case 'N':
+                    // October
+                    if (CheckStringMatch(input, inputIndex, "october"))
+                    {
+                        var result = input.Slice(inputIndex, 7);
+                        inputIndex += 7;
+                        return result;
+                    }
+
+                    break;
+
                 case 'n':
-                {
-                    // Parse November:
-                    var fullMonth = input.Substring(inputIndex, "November".Length);
-                    inputIndex += "November".Length;
-                    return fullMonth;
-                }
-                case 'D':
+                    // November
+                    if (CheckStringMatch(input, inputIndex, "november"))
+                    {
+                        var result = input.Slice(inputIndex, 8);
+                        inputIndex += 8;
+                        return result;
+                    }
+
+                    break;
+
                 case 'd':
-                {
-                    // Parse December:
-                    var fullMonth = input.Substring(inputIndex, "December".Length);
-                    inputIndex += "December".Length;
-                    return fullMonth;
-                }
+                    // December
+                    if (CheckStringMatch(input, inputIndex, "december"))
+                    {
+                        var result = input.Slice(inputIndex, 8);
+                        inputIndex += 8;
+                        return result;
+                    }
+
+                    break;
             }
 
             throw new FormatException("Unrecognized full month format for this locale");
         }
 
-        public override DayOfWeek ParseDayOfWeekAbbreviated(string input)
+
+        public override DayOfWeek ParseDayOfWeekAbbreviated(ReadOnlySpan<char> input)
         {
-            return input.ToLower() switch
+            if (input.Length != 3)
+                throw new ArgumentException("Invalid abbreviated day of week length");
+
+            // Use bitwise OR with 0x20 for fast case-insensitive comparison
+            char c1 = (char)(input[0] | 0x20);
+            char c2 = (char)(input[1] | 0x20);
+            char c3 = (char)(input[2] | 0x20);
+
+            switch (c1)
             {
-                "mon" => DayOfWeek.Monday,
-                "tue" => DayOfWeek.Tuesday,
-                "wed" => DayOfWeek.Wednesday,
-                "thu" => DayOfWeek.Thursday,
-                "fri" => DayOfWeek.Friday,
-                "sat" => DayOfWeek.Saturday,
-                "sun" => DayOfWeek.Sunday,
-                _ => throw new ArgumentException()
-            };
+                case 'm':
+                    if (c2 == 'o' && c3 == 'n') return DayOfWeek.Monday; // mon
+                    break;
+                case 't':
+                    if (c2 == 'u' && c3 == 'e') return DayOfWeek.Tuesday; // tue
+                    if (c2 == 'h' && c3 == 'u') return DayOfWeek.Thursday; // thu
+                    break;
+                case 'w':
+                    if (c2 == 'e' && c3 == 'd') return DayOfWeek.Wednesday; // wed
+                    break;
+                case 'f':
+                    if (c2 == 'r' && c3 == 'i') return DayOfWeek.Friday; // fri
+                    break;
+                case 's':
+                    if (c2 == 'a' && c3 == 't') return DayOfWeek.Saturday; // sat
+                    if (c2 == 'u' && c3 == 'n') return DayOfWeek.Sunday; // sun
+                    break;
+            }
+
+            throw new ArgumentException("Unrecognized abbreviated day of week for this locale");
         }
 
-        public override DayOfWeek ParseDayOfWeekFull(string input)
+
+        public override DayOfWeek ParseDayOfWeekFull(ReadOnlySpan<char> input)
         {
-            return input.ToLower() switch
+            if (input.Length < 6) // Shortest is "friday" (6 chars)
+                throw new ArgumentException("Invalid full day of week length");
+
+            // Use bitwise OR with 0x20 for fast case-insensitive comparison
+            char firstChar = (char)(input[0] | 0x20);
+
+            switch (firstChar)
             {
-                "monday" => DayOfWeek.Monday,
-                "tuesday" => DayOfWeek.Tuesday,
-                "wednesday" => DayOfWeek.Wednesday,
-                "thursday" => DayOfWeek.Thursday,
-                "friday" => DayOfWeek.Friday,
-                "saturday" => DayOfWeek.Saturday,
-                "sunday" => DayOfWeek.Sunday,
-                _ => throw new ArgumentException()
-            };
+                case 'm':
+                    // Monday
+                    if (input.Length == 6 &&
+                        (input[1] | 0x20) == 'o' &&
+                        (input[2] | 0x20) == 'n' &&
+                        (input[3] | 0x20) == 'd' &&
+                        (input[4] | 0x20) == 'a' &&
+                        (input[5] | 0x20) == 'y')
+                        return DayOfWeek.Monday;
+                    break;
+
+                case 't':
+                    if (input.Length == 7)
+                    {
+                        char secondChar = (char)(input[1] | 0x20);
+                        if (secondChar == 'u')
+                        {
+                            // Tuesday
+                            if ((input[2] | 0x20) == 'e' &&
+                                (input[3] | 0x20) == 's' &&
+                                (input[4] | 0x20) == 'd' &&
+                                (input[5] | 0x20) == 'a' &&
+                                (input[6] | 0x20) == 'y')
+                                return DayOfWeek.Tuesday;
+                        }
+                        else if (secondChar == 'h')
+                        {
+                            // Thursday
+                            if ((input[2] | 0x20) == 'u' &&
+                                (input[3] | 0x20) == 'r' &&
+                                (input[4] | 0x20) == 's' &&
+                                (input[5] | 0x20) == 'd' &&
+                                (input[6] | 0x20) == 'a' &&
+                                (input[7] | 0x20) == 'y')
+                                return DayOfWeek.Thursday;
+                        }
+                    }
+                    else if (input.Length == 8 && (input[1] | 0x20) == 'h')
+                    {
+                        // Thursday (8 chars)
+                        if ((input[2] | 0x20) == 'u' &&
+                            (input[3] | 0x20) == 'r' &&
+                            (input[4] | 0x20) == 's' &&
+                            (input[5] | 0x20) == 'd' &&
+                            (input[6] | 0x20) == 'a' &&
+                            (input[7] | 0x20) == 'y')
+                            return DayOfWeek.Thursday;
+                    }
+
+                    break;
+
+                case 'w':
+                    // Wednesday
+                    if (input.Length == 9 &&
+                        (input[1] | 0x20) == 'e' &&
+                        (input[2] | 0x20) == 'd' &&
+                        (input[3] | 0x20) == 'n' &&
+                        (input[4] | 0x20) == 'e' &&
+                        (input[5] | 0x20) == 's' &&
+                        (input[6] | 0x20) == 'd' &&
+                        (input[7] | 0x20) == 'a' &&
+                        (input[8] | 0x20) == 'y')
+                        return DayOfWeek.Wednesday;
+                    break;
+
+                case 'f':
+                    // Friday
+                    if (input.Length == 6 &&
+                        (input[1] | 0x20) == 'r' &&
+                        (input[2] | 0x20) == 'i' &&
+                        (input[3] | 0x20) == 'd' &&
+                        (input[4] | 0x20) == 'a' &&
+                        (input[5] | 0x20) == 'y')
+                        return DayOfWeek.Friday;
+                    break;
+
+                case 's':
+                    if (input.Length == 8)
+                    {
+                        // Saturday
+                        if ((input[1] | 0x20) == 'a' &&
+                            (input[2] | 0x20) == 't' &&
+                            (input[3] | 0x20) == 'u' &&
+                            (input[4] | 0x20) == 'r' &&
+                            (input[5] | 0x20) == 'd' &&
+                            (input[6] | 0x20) == 'a' &&
+                            (input[7] | 0x20) == 'y')
+                            return DayOfWeek.Saturday;
+                    }
+                    else if (input.Length == 6)
+                    {
+                        // Sunday
+                        if ((input[1] | 0x20) == 'u' &&
+                            (input[2] | 0x20) == 'n' &&
+                            (input[3] | 0x20) == 'd' &&
+                            (input[4] | 0x20) == 'a' &&
+                            (input[5] | 0x20) == 'y')
+                            return DayOfWeek.Sunday;
+                    }
+
+                    break;
+            }
+
+            throw new ArgumentException("Unrecognized full day of week for this locale");
         }
 
-        public override string ConsumeDayOfWeek(ref string input, ref int inputIndex)
+
+        public override ReadOnlySpan<char> ConsumeDayOfWeek(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            string fullWeekDay;
-    
-            if (input[inputIndex] == 'm' || input[inputIndex] == 'M')
+            if (inputIndex >= input.Length)
+                throw new FormatException("Unexpected end of input");
+
+            char firstChar = (char)(input[inputIndex] | 0x20); // Fast lowercase conversion
+
+            switch (firstChar)
             {
-                // Parse Wednesday
-                fullWeekDay = input.Substring(inputIndex, "Monday".Length);
-                inputIndex += "Monday".Length;
+                case 'm':
+                    // Monday
+                    if (CheckStringMatch(input, inputIndex, "monday"))
+                    {
+                        var result = input.Slice(inputIndex, 6);
+                        inputIndex += 6;
+                        return result;
+                    }
+
+                    break;
+
+                case 't':
+                    if (inputIndex + 1 < input.Length)
+                    {
+                        char secondChar = (char)(input[inputIndex + 1] | 0x20);
+                        if (secondChar == 'u')
+                        {
+                            // Tuesday
+                            if (CheckStringMatch(input, inputIndex, "tuesday"))
+                            {
+                                var result = input.Slice(inputIndex, 7);
+                                inputIndex += 7;
+                                return result;
+                            }
+                        }
+                        else if (secondChar == 'h')
+                        {
+                            // Thursday
+                            if (CheckStringMatch(input, inputIndex, "thursday"))
+                            {
+                                var result = input.Slice(inputIndex, 8);
+                                inputIndex += 8;
+                                return result;
+                            }
+                        }
+                    }
+
+                    break;
+
+                case 'w':
+                    // Wednesday
+                    if (CheckStringMatch(input, inputIndex, "wednesday"))
+                    {
+                        var result = input.Slice(inputIndex, 9);
+                        inputIndex += 9;
+                        return result;
+                    }
+
+                    break;
+
+                case 'f':
+                    // Friday
+                    if (CheckStringMatch(input, inputIndex, "friday"))
+                    {
+                        var result = input.Slice(inputIndex, 6);
+                        inputIndex += 6;
+                        return result;
+                    }
+
+                    break;
+
+                case 's':
+                    if (inputIndex + 1 < input.Length)
+                    {
+                        char secondChar = (char)(input[inputIndex + 1] | 0x20);
+                        if (secondChar == 'a')
+                        {
+                            // Saturday
+                            if (CheckStringMatch(input, inputIndex, "saturday"))
+                            {
+                                var result = input.Slice(inputIndex, 8);
+                                inputIndex += 8;
+                                return result;
+                            }
+                        }
+                        else if (secondChar == 'u')
+                        {
+                            // Sunday
+                            if (CheckStringMatch(input, inputIndex, "sunday"))
+                            {
+                                var result = input.Slice(inputIndex, 6);
+                                inputIndex += 6;
+                                return result;
+                            }
+                        }
+                    }
+
+                    break;
             }
-            else if (input[inputIndex] == 't' || input[inputIndex] == 'T')
-            {
-                if (input[inputIndex + 1] == 'u' || input[inputIndex + 1] == 'U')
-                {
-                    fullWeekDay = input.Substring(inputIndex, "Tuesday".Length);
-                    inputIndex += "Tuesday".Length;
-                }
-                else if (input[inputIndex + 1] == 'h' || input[inputIndex + 1] == 'H')
-                {
-                    fullWeekDay = input.Substring(inputIndex, "Thursday".Length);
-                    inputIndex += "Thursday".Length;
-                }
-                else
-                {
-                    throw new FormatException("Unrecognized day of week format for this locale");
-                }
-            }
-            else if (input[inputIndex] == 'w' || input[inputIndex] == 'W')
-            {
-                fullWeekDay = input.Substring(inputIndex, "Wednesday".Length);
-                inputIndex += "Wednesday".Length;
-            }
-            else if (input[inputIndex] == 'f' || input[inputIndex] == 'F')
-            {
-                fullWeekDay = input.Substring(inputIndex, "Friday".Length);
-                inputIndex += "Friday".Length;
-            }
-            else if (input[inputIndex] == 's' || input[inputIndex] == 'S')
-            {
-                if (input[inputIndex + 1] == 'a' || input[inputIndex + 1] == 'A')
-                {
-                    fullWeekDay = input.Substring(inputIndex, "Saturday".Length);
-                    inputIndex += "Saturday".Length;
-                }
-                else if (input[inputIndex + 1] == 'u' || input[inputIndex + 1] == 'U')
-                {
-                    fullWeekDay = input.Substring(inputIndex, "Sunday".Length);
-                    inputIndex += "Sunday".Length;
-                }
-                else
-                {
-                    throw new FormatException("Unrecognized day of week format for this locale");
-                }
-            }
-            else
-            {
-                throw new FormatException("Unrecognized day of week format for this locale");
-            }
-    
-            return fullWeekDay;
+
+            throw new FormatException("Unrecognized day of week format for this locale");
         }
     }
 }

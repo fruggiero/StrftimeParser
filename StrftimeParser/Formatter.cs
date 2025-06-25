@@ -7,150 +7,125 @@ namespace StrftimeParser
     {
         protected abstract CultureInfo Culture { get; }
 
-        public virtual string ConsumeDayOfWeek(ref string input, ref int inputIndex)
+        public virtual ReadOnlySpan<char> ConsumeDayOfWeek(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
             foreach (var dayName in Culture.DateTimeFormat.DayNames)
             {
-                if (input.Length < dayName.Length + inputIndex
-                    || input.Substring(inputIndex, dayName.Length) != dayName)
-                {
+                if (input.Length < dayName.Length + inputIndex)
                     continue;
-                }
 
+                var inputSlice = input.Slice(inputIndex, dayName.Length);
+                if (!inputSlice.SequenceEqual(dayName.AsSpan()))
+                    continue;
+
+                var result = inputSlice;
                 inputIndex += dayName.Length;
-                return dayName;
+                return result;
             }
 
             throw new FormatException("Invalid day of week for this culture");
         }
         
-        public virtual string ConsumeAbbreviatedDayOfWeek(ref string input, ref int inputIndex)
+        public virtual ReadOnlySpan<char> ConsumeAbbreviatedDayOfWeek(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
             foreach (var abbreviatedDayName in Culture.DateTimeFormat.AbbreviatedDayNames)
             {
-                if (input.Length < abbreviatedDayName.Length + inputIndex
-                    || input.Substring(inputIndex, abbreviatedDayName.Length) != abbreviatedDayName)
-                {
+                if (input.Length < abbreviatedDayName.Length + inputIndex)
                     continue;
-                }
 
+                var inputSlice = input.Slice(inputIndex, abbreviatedDayName.Length);
+                if (!inputSlice.SequenceEqual(abbreviatedDayName.AsSpan()))
+                    continue;
+
+                var result = inputSlice;
                 inputIndex += abbreviatedDayName.Length;
-                return abbreviatedDayName;
+                return result;
             }
 
             throw new FormatException("Invalid abbreviated day of week for this culture");
         }
 
-        public virtual string ConsumeAbbreviatedMonth(ref string input, ref int inputIndex)
+        public virtual ReadOnlySpan<char> ConsumeAbbreviatedMonth(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
             foreach (var abbreviatedMonth in Culture.DateTimeFormat.AbbreviatedMonthNames)
             {
-                if (input.Length < abbreviatedMonth.Length + inputIndex
-                    || input.Substring(inputIndex, abbreviatedMonth.Length) != abbreviatedMonth)
-                {
+                if (input.Length < abbreviatedMonth.Length + inputIndex)
                     continue;
-                }
 
+                var inputSlice = input.Slice(inputIndex, abbreviatedMonth.Length);
+                if (!inputSlice.SequenceEqual(abbreviatedMonth.AsSpan()))
+                    continue;
+
+                var result = inputSlice;
                 inputIndex += abbreviatedMonth.Length;
-                return abbreviatedMonth;
+                return result;
             }
 
             throw new FormatException("Invalid abbreviated month for this culture");
         }
 
-        public virtual string ConsumeFullMonth(ref string input, ref int inputIndex)
+        
+        public virtual ReadOnlySpan<char> ConsumeFullMonth(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
             foreach (var month in Culture.DateTimeFormat.MonthNames)
             {
-                if (input.Length < month.Length + inputIndex
-                    || input.Substring(inputIndex, month.Length) != month)
-                {
+                if (input.Length < month.Length + inputIndex)
                     continue;
-                }
 
+                var inputSlice = input.Slice(inputIndex, month.Length);
+                if (!inputSlice.SequenceEqual(month.AsSpan()))
+                    continue;
+
+                var result = inputSlice;
                 inputIndex += month.Length;
-                return month;
+                return result;
             }
 
             throw new FormatException("Invalid month for this culture");
         }
 
-        public static string ConsumeDayOfTheMonth(string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeDayOfTheMonth(ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static string ConsumeShortMmDdYy(string input, ref int inputIndex)
-        {
-            var res = input.Substring(inputIndex, 8);
-            inputIndex += 8;
-            return res;
-        }
-
-        public static string ConsumeShortYyyyMmDd(string input, ref int inputIndex)
-        {
-            var res = input.Substring(inputIndex, 10);
-            inputIndex += 10;
-            return res;
-        }
-
-        public static MmDdYy ParseShortMmDdYy(string input)
-        {
-            return new MmDdYy
-            {
-                Mm = int.Parse(input.Substring(0, 2)),
-                Dd = int.Parse(input.Substring(3, 2)),
-                Yy = int.Parse(input.Substring(6, 2))
-            };
-        }
-
-        public static YyyyMmDd ParseShortYyyyMmDd(string input)
-        {
-            return new YyyyMmDd
-            {
-                Yyyy = int.Parse(input.Substring(0, 4)),
-                Mm = int.Parse(input.Substring(5, 2)),
-                Dd = int.Parse(input.Substring(8, 2))
-            };
-        }
-
-        public virtual int ParseMonthFull(string input)
+        public virtual int ParseMonthFull(ReadOnlySpan<char> input)
         {
             for (int i = 0; i < Culture.DateTimeFormat.MonthNames.Length; i++)
             {
-                if (input == Culture.DateTimeFormat.MonthNames[i])
+                if (input.SequenceEqual(Culture.DateTimeFormat.MonthNames[i].AsSpan()))
                     return i + 1;
             }
             throw new FormatException("Invalid month for this culture");
         }
 
-        public virtual int ParseMonthAbbreviated(string input)
+        public virtual int ParseMonthAbbreviated(ReadOnlySpan<char> input)
         {
             for (int i = 0; i < Culture.DateTimeFormat.AbbreviatedMonthNames.Length; i++)
             {
-                if (input == Culture.DateTimeFormat.AbbreviatedMonthNames[i])
+                if (input.SequenceEqual(Culture.DateTimeFormat.AbbreviatedMonthNames[i].AsSpan()))
                     return i + 1;
             }
             throw new FormatException("Invalid abbreviated month for this culture");
         }
 
-        public virtual DayOfWeek ParseDayOfWeekAbbreviated(string input)
+        public virtual DayOfWeek ParseDayOfWeekAbbreviated(ReadOnlySpan<char> input)
         {
             for (int i = 0; i < Culture.DateTimeFormat.AbbreviatedDayNames.Length; i++)
             {
-                if (input == Culture.DateTimeFormat.AbbreviatedDayNames[i])
+                if (input.SequenceEqual(Culture.DateTimeFormat.AbbreviatedDayNames[i].AsSpan()))
                     return (DayOfWeek)i;
             }
             throw new FormatException("Invalid abbreviated day of week for this culture");
         }
 
-        public virtual DayOfWeek ParseDayOfWeekFull(string input)
+        public virtual DayOfWeek ParseDayOfWeekFull(ReadOnlySpan<char> input)
         {
             for (int i = 0; i < Culture.DateTimeFormat.DayNames.Length; i++)
             {
-                if (input == Culture.DateTimeFormat.DayNames[i])
+                if (input.SequenceEqual(Culture.DateTimeFormat.DayNames[i].AsSpan()))
                     return (DayOfWeek)i;
             }
             throw new FormatException("Invalid day of week for this culture");
@@ -194,226 +169,459 @@ namespace StrftimeParser
             return now;
         }
 
-        public static string ConsumeHour24(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeHour24(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static string ParseAmPmDesignation(string input)
+        public static string ParseAmPmDesignation(ReadOnlySpan<char> input)
         {
-            var chars = input.Substring(0, 2).ToUpper();
-            return chars switch
-            {
-                "AM" => "AM",
-                "PM" => "PM",
-                _ => throw new ArgumentException("Invalid AM/PM designation")
-            };
+            if (input.Length < 2)
+                throw new ArgumentException("Invalid AM/PM designation");
+
+            char c1 = char.ToUpper(input[0]);
+            char c2 = char.ToUpper(input[1]);
+
+            if (c1 == 'A' && c2 == 'M')
+                return "AM";
+            else if (c1 == 'P' && c2 == 'M')
+                return "PM";
+            else
+                throw new ArgumentException("Invalid AM/PM designation");
         }
 
-        public static int ParseHour24(string input)
+        public static int ParseHour24(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length is < 1 or > 2)
+                throw new ArgumentException("Invalid 24 hour format");
+
+            var result = 0;
+            foreach (var c in input)
             {
-                >= 0 and <= 23 => res,
+                if (c is < '0' or > '9')
+                    throw new ArgumentException("Invalid 24 hour format");
+                result = result * 10 + (c - '0');
+            }
+
+            return result switch
+            {
+                >= 0 and <= 23 => result,
                 _ => throw new ArgumentException("Invalid 24 hour format")
             };
         }
 
-        public static int ParseHour12(string input)
+        public static int ParseHour12(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length is < 1 or > 2)
+                throw new ArgumentException("Invalid 12 hour format");
+
+            var result = 0;
+            foreach (var c in input)
             {
-                >= 1 and <= 12 => res,
+                if (c is < '0' or > '9')
+                    throw new ArgumentException("Invalid 12 hour format");
+                result = result * 10 + (c - '0');
+            }
+
+            return result switch
+            {
+                >= 1 and <= 12 => result,
                 _ => throw new ArgumentException("Invalid 12 hour format")
             };
         }
 
-        public static string ConsumeAmPmDesignation(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeAmPmDesignation(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static string ConsumeHour12(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeHour12(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static string ConsumeDayOfYear(string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeDayOfYear(ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 3);
+            var res = input.Slice(inputIndex, 3);
             inputIndex += 3;
             return res;
         }
 
-        public static int ParseDayOfYear(string dayOfYear)
+        public static int ParseDayOfYear(ReadOnlySpan<char> dayOfYear)
         {
-            var res = int.Parse(dayOfYear.Substring(0, 3), CultureInfo.InvariantCulture);
-            return res switch
+            if (dayOfYear.Length < 3)
+                throw new FormatException("Invalid day of year");
+
+            char c1 = dayOfYear[0];
+            char c2 = dayOfYear[1];
+            char c3 = dayOfYear[2];
+    
+            if (c1 < '0' || c1 > '9' || c2 < '0' || c2 > '9' || c3 < '0' || c3 > '9')
+                throw new FormatException("Invalid day of year");
+
+            int result = (c1 - '0') * 100 + (c2 - '0') * 10 + (c3 - '0');
+
+            return result switch
             {
-                >= 1 and <= 366 => res,
+                >= 1 and <= 366 => result,
                 _ => throw new FormatException("Invalid day of year")
             };
         }
 
-        public static int ParseDayOfTheMonth(string dayOfTheMonth)
+        public static int ParseDayOfTheMonthZeroPadded(ReadOnlySpan<char> dayOfTheMonth)
         {
-            var res = int.Parse(dayOfTheMonth, CultureInfo.InvariantCulture);
-            return res switch
+            if (dayOfTheMonth.Length is < 1 or > 2)
+                throw new FormatException("Invalid day of the month");
+
+            var result = 0;
+            foreach (var c in dayOfTheMonth)
             {
-                >= 1 and <= 31 => res,
+                if (c is < '0' or > '9')
+                    throw new FormatException("Invalid day of the month");
+                result = result * 10 + (c - '0');
+            }
+
+            return result switch
+            {
+                >= 1 and <= 31 => result,
+                _ => throw new FormatException("Invalid day of the month")
+            };
+        }
+        
+        public static int ParseDayOfTheMonthFlexible(ReadOnlySpan<char> dayOfTheMonth)
+        {
+            if (dayOfTheMonth.Length is < 1 or > 2)
+                throw new FormatException("Invalid day of the month");
+
+            var result = 0;
+            
+            // Handle first character
+            char firstChar = dayOfTheMonth[0];
+            if (firstChar == ' ')
+            {
+                // Space-padded single digit - first char is space, ignore it
+                result = 0;
+            }
+            else if (firstChar is >= '0' and <= '9')
+            {
+                // Valid digit
+                result = firstChar - '0';
+            }
+            else
+            {
+                throw new FormatException("Invalid day of the month");
+            }
+            
+            // Handle second character if present
+            if (dayOfTheMonth.Length == 2)
+            {
+                char secondChar = dayOfTheMonth[1];
+                if (secondChar is >= '0' and <= '9')
+                {
+                    result = result * 10 + (secondChar - '0');
+                }
+                else
+                {
+                    throw new FormatException("Invalid day of the month");
+                }
+            }
+
+            return result switch
+            {
+                >= 1 and <= 31 => result,
                 _ => throw new FormatException("Invalid day of the month")
             };
         }
 
-        public static string ConsumeMonth(ref string input, ref int inputIndex)
+        public static int ParseDayOfTheMonthSpacePadded(ReadOnlySpan<char> dayOfTheMonth)
         {
-            var res = input.Substring(inputIndex, 2);
+            if (dayOfTheMonth.Length != 2)
+                throw new FormatException("Invalid space-padded day of the month");
+
+            int result = 0;
+
+            // Handle the first character (can be space or digit)
+            char firstChar = dayOfTheMonth[0];
+            if (firstChar == ' ')
+            {
+                // Space-padded single digit (e.g., " 1", " 9")
+                result = 0;
+            }
+            else if (firstChar is >= '0' and <= '9')
+            {
+                // Two-digit number (e.g., "10", "31")
+                result = firstChar - '0';
+            }
+            else
+            {
+                throw new FormatException("Invalid space-padded day of the month");
+            }
+
+            // Handle the second character (must be a digit)
+            char secondChar = dayOfTheMonth[1];
+            if (secondChar is >= '0' and <= '9')
+            {
+                result = result * 10 + (secondChar - '0');
+            }
+            else
+            {
+                throw new FormatException("Invalid space-padded day of the month");
+            }
+
+            return result switch
+            {
+                >= 1 and <= 31 => result,
+                _ => throw new FormatException("Invalid space-padded day of the month")
+            };
+        }
+        
+        public static ReadOnlySpan<char> ConsumeMonth(ref ReadOnlySpan<char> input, ref int inputIndex)
+        {
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static int ParseMonth(string input)
+        public static int ParseMonth(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input.Substring(0, 2), CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length < 2)
+                throw new FormatException("Invalid month");
+
+            char c1 = input[0];
+            char c2 = input[1];
+    
+            if (c1 < '0' || c1 > '9' || c2 < '0' || c2 > '9')
+                throw new FormatException("Invalid month");
+
+            int result = (c1 - '0') * 10 + (c2 - '0');
+
+            return result switch
             {
-                >= 1 and <= 12 => res,
+                >= 1 and <= 12 => result,
                 _ => throw new FormatException("Invalid month")
             };
         }
 
-        public static string ConsumeMinute(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeMinute(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static int ParseMinute(string input)
+        public static int ParseMinute(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length is < 1 or > 2)
+                throw new FormatException("Invalid minute");
+
+            var result = 0;
+            foreach (var c in input)
             {
-                >= 0 and <= 59 => res,
+                if (c is < '0' or > '9')
+                    throw new FormatException("Invalid minute");
+                result = result * 10 + (c - '0');
+            }
+
+            return result switch
+            {
+                >= 0 and <= 59 => result,
                 _ => throw new FormatException("Invalid minute")
             };
         }
 
-        public static string ConsumeNewLine(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeNewLine(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 1);
+            var res = input.Slice(inputIndex, 1);
             inputIndex += 1;
             return res;
         }
 
-        public static string ConsumeTab(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeTab(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 1);
+            var res = input.Slice(inputIndex, 1);
             inputIndex += 1;
             return res;
         }
 
-        public static string ConsumeSecond(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeSecond(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static int ParseSecond(string input)
+        public static int ParseSecond(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length is < 1 or > 2)
+                throw new FormatException("Invalid second");
+
+            var result = 0;
+            foreach (var c in input)
             {
-                >= 0 and <= 60 => res,
+                if (c is < '0' or > '9')
+                    throw new FormatException("Invalid second");
+                result = result * 10 + (c - '0');
+            }
+
+            return result switch
+            {
+                >= 0 and <= 60 => result,
                 _ => throw new FormatException("Invalid second")
             };
         }
 
-        public static string ConsumeIsoTime(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeIsoTime(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 8);
+            var res = input.Slice(inputIndex, 8);
             inputIndex += 8;
             return res;
         }
 
-        public static (int, int, int) ParseIsoTime(string input)
+        public static (int, int, int) ParseIsoTime(ReadOnlySpan<char> input)
         {
-            var hour = int.Parse(input.Substring(0, 2), CultureInfo.InvariantCulture);
-            var minute = int.Parse(input.Substring(3, 2), CultureInfo.InvariantCulture);
-            var second = int.Parse(input.Substring(6, 2), CultureInfo.InvariantCulture);
+            if (input.Length != 8)
+                throw new FormatException("Invalid iso time format");
 
+            // Parse hour (HH)
+            char h1 = input[0];
+            char h2 = input[1];
+            if (h1 < '0' || h1 > '9' || h2 < '0' || h2 > '9')
+                throw new FormatException("Invalid iso time hour");
+            int hour = (h1 - '0') * 10 + (h2 - '0');
+
+            // Check colon separator
+            if (input[2] != ':')
+                throw new FormatException("Invalid iso time format");
+
+            // Parse minute (MM)
+            char m1 = input[3];
+            char m2 = input[4];
+            if (m1 < '0' || m1 > '9' || m2 < '0' || m2 > '9')
+                throw new FormatException("Invalid iso time minute");
+            int minute = (m1 - '0') * 10 + (m2 - '0');
+
+            // Check colon separator
+            if (input[5] != ':')
+                throw new FormatException("Invalid iso time format");
+
+            // Parse second (SS)
+            char s1 = input[6];
+            char s2 = input[7];
+            if (s1 < '0' || s1 > '9' || s2 < '0' || s2 > '9')
+                throw new FormatException("Invalid iso time second");
+            int second = (s1 - '0') * 10 + (s2 - '0');
+
+            // Validate ranges
             if (hour is < 0 or > 23) throw new FormatException("Invalid iso time hour");
             if (minute is < 0 or > 59) throw new FormatException("Invalid iso time minute");
             if (second is < 0 or > 60) throw new FormatException("Invalid iso time second");
-            
+    
             return (hour, minute, second);
         }
 
-        public static string ConsumeIsoWeekDay(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeIsoWeekDay(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 1);
+            var res = input.Slice(inputIndex, 1);
             inputIndex += 1;
             return res;
         }
 
-        public static int ParseIsoWeekDay(string input)
+        
+        public static int ParseIsoWeekDay(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            if (res is < 1 or > 7) throw new FormatException("Invalid iso week day");
-            return res;
+            if (input.Length != 1)
+                throw new FormatException("Invalid iso week day");
+
+            char c = input[0];
+            if (c is < '0' or > '9')
+                throw new FormatException("Invalid iso week day");
+
+            int result = c - '0';
+    
+            if (result is < 1 or > 7) 
+                throw new FormatException("Invalid iso week day");
+        
+            return result;
         }
 
-        public static string ConsumeWeekDaySundayBased(string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeWeekDaySundayBased(ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 1);
+            var res = input.Slice(inputIndex, 1);
             inputIndex += 1;
             return res;
         }
 
-        public static int ParseWeekDaySundayBased(string input)
+        public static int ParseWeekDaySundayBased(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length != 1)
+                throw new FormatException("Invalid week day sunday based");
+
+            char c = input[0];
+            if (c is < '0' or > '9')
+                throw new FormatException("Invalid week day sunday based");
+
+            int result = c - '0';
+    
+            return result switch
             {
-                >= 0 and <= 6 => res,
+                >= 0 and <= 6 => result,
                 _ => throw new FormatException("Invalid week day sunday based")
             };
         }
 
-        public static string ConsumeYearTwoDigits(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeYearTwoDigits(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 2);
+            var res = input.Slice(inputIndex, 2);
             inputIndex += 2;
             return res;
         }
 
-        public static int ParseYearTwoDigits(string input)
+        public static int ParseYearTwoDigits(ReadOnlySpan<char> input)
         {
-            var res = int.Parse(input, CultureInfo.InvariantCulture);
-            return res switch
+            if (input.Length != 2)
+                throw new FormatException("Invalid year two digits");
+
+            char c1 = input[0];
+            char c2 = input[1];
+    
+            if (c1 < '0' || c1 > '9' || c2 < '0' || c2 > '9')
+                throw new FormatException("Invalid year two digits");
+
+            int result = (c1 - '0') * 10 + (c2 - '0');
+    
+            return result switch
             {
-                >= 0 and <= 99 => res,
+                >= 0 and <= 99 => result,
                 _ => throw new FormatException("Invalid year two digits")
             };
         }
 
-        public static int ParseYear(string input)
+        public static int ParseYear(ReadOnlySpan<char> input)
         {
-            return int.Parse(input, CultureInfo.InvariantCulture);
+            // Manual parsing for 4-digit year (YYYY)
+            if (input.Length != 4)
+                throw new FormatException("Invalid year format");
+
+            var result = 0;
+            for (var i = 0; i < 4; i++)
+            {
+                var c = input[i];
+                if (c is < '0' or > '9')
+                    throw new FormatException("Invalid year format");
+                result = result * 10 + (c - '0');
+            }
+            return result;
         }
 
-        public static string ConsumeYearFull(ref string input, ref int inputIndex)
+        public static ReadOnlySpan<char> ConsumeYearFull(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
-            var res = input.Substring(inputIndex, 4);
+            var res = input.Slice(inputIndex, 4);
             inputIndex += 4;
             return res;
         }
@@ -561,6 +769,22 @@ namespace StrftimeParser
                 DayOfWeek.Saturday => "6",
                 _ => throw new FormatException("Unrecognized day of week")
             };
+        }
+
+        protected static bool CheckStringMatch(ReadOnlySpan<char> input, int startIndex, string target)
+        {
+            if (startIndex + target.Length > input.Length)
+                return false;
+
+            var slice = input.Slice(startIndex, target.Length);
+
+            for (int i = 0; i < target.Length; i++)
+            {
+                if ((slice[i] | 0x20) != target[i])
+                    return false;
+            }
+
+            return true;
         }
     }
 }

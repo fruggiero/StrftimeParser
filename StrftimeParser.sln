@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrftimeParserTest", "test\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{780CC547-3093-4206-A7F3-9F89F7125C9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrftimeParser.Benchmark", "test\StrftimeParser.Benchmark\StrftimeParser.Benchmark.csproj", "{98AC22BD-17C8-4AB6-993D-EAF972E3CFD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA0F1EFE-5AF3-4F67-B94E-EB6C67905B2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98AC22BD-17C8-4AB6-993D-EAF972E3CFD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98AC22BD-17C8-4AB6-993D-EAF972E3CFD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98AC22BD-17C8-4AB6-993D-EAF972E3CFD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98AC22BD-17C8-4AB6-993D-EAF972E3CFD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
