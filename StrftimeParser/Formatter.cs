@@ -1,11 +1,27 @@
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
+using StrftimeParser.Formatters;
 
 namespace StrftimeParser
 {
     internal abstract class Formatter
     {
         protected abstract CultureInfo Culture { get; }
+
+        private static readonly ConcurrentDictionary<string, Formatter> FormatterCache = new();
+        private static readonly Lazy<EnUsFormatter> _enUsLazyInstance = new(() => new EnUsFormatter());
+
+        public static Formatter For(CultureInfo culture)
+        {
+            if (culture == null) throw new ArgumentNullException(nameof(culture));
+            return culture.Name switch
+            {
+                "en-US" => _enUsLazyInstance.Value,
+                // Fallback to generic formatter for other cultures (slower)
+                _ => FormatterCache.GetOrAdd(culture.Name, _ => new GenericFormatter(culture))
+            };
+        }
 
         public virtual ReadOnlySpan<char> ConsumeDayOfWeek(ref ReadOnlySpan<char> input, ref int inputIndex)
         {

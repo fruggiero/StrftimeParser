@@ -1,17 +1,13 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
-using StrftimeParser.Formatters;
 using DateTime = System.DateTime;
 
 namespace StrftimeParser
 {
     public static class Strftime
     {
-        private static readonly ConcurrentDictionary<string, Formatter> FormatterCache = new();
-
         /// <summary>
         /// Convert a strftime-formatted string into a DateTime object.
         /// For the conversion, the current culture is used.
@@ -27,7 +23,7 @@ namespace StrftimeParser
 
         public static string ToString(DateTime dt, string format, CultureInfo culture)
         {
-            var formatter = GetFormatter(culture);
+            var formatter = Formatter.For(culture);
             var builder = new StringBuilder();
 
             for (var formatIndex = 0; formatIndex < format.Length; formatIndex++)
@@ -142,7 +138,7 @@ namespace StrftimeParser
         public static DateTime Parse(string input, string format, CultureInfo culture, bool coherenceCheck = false)
         {
             var inputSpan = input.AsSpan();
-            var formatter = GetFormatter(culture);
+            var formatter = Formatter.For(culture);
             var res = new DateTime(1900, 1, 1, 0, 0, 0);
             var now = DateTime.Now;
             var yearAssigned = false;
@@ -630,15 +626,6 @@ namespace StrftimeParser
             }
 
             return res;
-        }
-
-        private static Formatter GetFormatter(CultureInfo culture)
-        {
-            return FormatterCache.GetOrAdd(culture.Name, cultureName => cultureName switch
-            {
-                "en-US" => new EnUsFormatter(),
-                _ => new GenericFormatter(culture)
-            });
         }
 
         private static int ConvertTo12HourFormat(int hour24Hour)
