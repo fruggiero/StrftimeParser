@@ -9,7 +9,11 @@ namespace StrftimeParser
     {
         protected abstract CultureInfo Culture { get; }
 
-        private static readonly ConcurrentDictionary<string, Formatter> FormatterCache = new();
+        private static readonly ConcurrentDictionary<string, Formatter> FormatterCache = new()
+        {
+            [CultureInfo.InvariantCulture.Name] = new GenericFormatter(CultureInfo.InvariantCulture) // Predefined formatter for invariant culture
+        };
+        
         private static readonly Lazy<EnUsFormatter> _enUsLazyInstance = new(() => new EnUsFormatter());
 
         public static Formatter For(CultureInfo culture)
@@ -620,19 +624,21 @@ namespace StrftimeParser
 
         public static int ParseYear(ReadOnlySpan<char> input)
         {
-            // Manual parsing for 4-digit year (YYYY)
             if (input.Length != 4)
                 throw new FormatException("Invalid year format");
 
-            var result = 0;
-            for (var i = 0; i < 4; i++)
-            {
-                var c = input[i];
-                if (c is < '0' or > '9')
-                    throw new FormatException("Invalid year format");
-                result = result * 10 + (c - '0');
-            }
-            return result;
+            char c0 = input[0];
+            char c1 = input[1]; 
+            char c2 = input[2];
+            char c3 = input[3];
+
+            if (c0 is < '0' or > '9' || 
+                c1 is < '0' or > '9' || 
+                c2 is < '0' or > '9' || 
+                c3 is < '0' or > '9')
+                throw new FormatException("Invalid year format");
+
+            return (c0 - '0') * 1000 + (c1 - '0') * 100 + (c2 - '0') * 10 + (c3 - '0');
         }
 
         public static ReadOnlySpan<char> ConsumeYearFull(ref ReadOnlySpan<char> input, ref int inputIndex)
@@ -787,19 +793,17 @@ namespace StrftimeParser
             };
         }
 
-        protected static bool CheckStringMatch(ReadOnlySpan<char> input, int startIndex, string target)
+        protected static bool IsMatchIgnoringCase(ReadOnlySpan<char> input, int startIndex, ReadOnlySpan<char> target)
         {
             if (startIndex + target.Length > input.Length)
                 return false;
 
-            var slice = input.Slice(startIndex, target.Length);
-
             for (int i = 0; i < target.Length; i++)
             {
-                if ((slice[i] | 0x20) != target[i])
+                // Fast ASCII case-insensitive comparison
+                if ((input[startIndex + i] | 0x20) != (target[i] | 0x20))
                     return false;
             }
-
             return true;
         }
     }

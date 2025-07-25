@@ -23,34 +23,55 @@ namespace StrftimeParser.Formatters
 
         public override int ParseMonthFull(ReadOnlySpan<char> input)
         {
-            if (input.Equals("january".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 1;
-            if (input.Equals("february".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 2;
-            if (input.Equals("march".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 3;
-            if (input.Equals("april".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 4;
-            if (input.Equals("may".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 5;
-            if (input.Equals("june".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 6;
-            if (input.Equals("july".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 7;
-            if (input.Equals("august".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 8;
-            if (input.Equals("september".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 9;
-            if (input.Equals("october".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 10;
-            if (input.Equals("november".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 11;
-            if (input.Equals("december".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                return 12;
+            if (input.IsEmpty)
+                throw new FormatException("Empty month name");
 
+            char firstChar = (char)(input[0] | 0x20);
+            switch (firstChar)
+            {
+                case 'j':
+                    if (input.Length == 7 && IsMatchIgnoringCase(input, 0, "january".AsSpan()))
+                        return 1;
+                    if (input.Length == 4 && IsMatchIgnoringCase(input, 0, "june".AsSpan()))
+                        return 6;
+                    if (input.Length == 4 && IsMatchIgnoringCase(input, 0, "july".AsSpan()))
+                        return 7;
+                    break;
+                case 'f':
+                    if (input.Length == 8 && IsMatchIgnoringCase(input, 0, "february".AsSpan()))
+                        return 2;
+                    break;
+                case 'm':
+                    if (input.Length == 5 && IsMatchIgnoringCase(input, 0, "march".AsSpan()))
+                        return 3;
+                    if (input.Length == 3 && IsMatchIgnoringCase(input, 0, "may".AsSpan()))
+                        return 5;
+                    break;
+                case 'a':
+                    if (input.Length == 5 && IsMatchIgnoringCase(input, 0, "april".AsSpan()))
+                        return 4;
+                    if (input.Length == 6 && IsMatchIgnoringCase(input, 0, "august".AsSpan()))
+                        return 8;
+                    break;
+                case 's':
+                    if (input.Length == 9 && IsMatchIgnoringCase(input, 0, "september".AsSpan()))
+                        return 9;
+                    break;
+                case 'o':
+                    if (input.Length == 7 && IsMatchIgnoringCase(input, 0, "october".AsSpan()))
+                        return 10;
+                    break;
+                case 'n':
+                    if (input.Length == 8 && IsMatchIgnoringCase(input, 0, "november".AsSpan()))
+                        return 11;
+                    break;
+                case 'd':
+                    if (input.Length == 8 && IsMatchIgnoringCase(input, 0, "december".AsSpan()))
+                        return 12;
+                    break;
+            }
             throw new FormatException("Unrecognized month name for this locale");
         }
-
 
         public override int ParseMonthAbbreviated(ReadOnlySpan<char> input)
         {
@@ -97,7 +118,6 @@ namespace StrftimeParser.Formatters
             throw new FormatException("Unrecognized month abbreviated for this locale");
         }
 
-
         public override ReadOnlySpan<char> ConsumeFullMonth(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
             if (inputIndex >= input.Length)
@@ -115,7 +135,7 @@ namespace StrftimeParser.Formatters
                         {
                             case 'a':
                                 // January
-                                if (CheckStringMatch(input, inputIndex, "january"))
+                                if (IsMatchIgnoringCase(input, inputIndex, "january".AsSpan()))
                                 {
                                     var result = input.Slice(inputIndex, 7);
                                     inputIndex += 7;
@@ -131,7 +151,7 @@ namespace StrftimeParser.Formatters
                                     {
                                         case 'l':
                                             // July
-                                            if (CheckStringMatch(input, inputIndex, "july"))
+                                            if (IsMatchIgnoringCase(input, inputIndex, "july".AsSpan()))
                                             {
                                                 var result = input.Slice(inputIndex, 4);
                                                 inputIndex += 4;
@@ -141,7 +161,7 @@ namespace StrftimeParser.Formatters
                                             break;
                                         case 'n':
                                             // June
-                                            if (CheckStringMatch(input, inputIndex, "june"))
+                                            if (IsMatchIgnoringCase(input, inputIndex, "june".AsSpan()))
                                             {
                                                 var result = input.Slice(inputIndex, 4);
                                                 inputIndex += 4;
@@ -160,7 +180,7 @@ namespace StrftimeParser.Formatters
 
                 case 'f':
                     // February
-                    if (CheckStringMatch(input, inputIndex, "february"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "february".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 8);
                         inputIndex += 8;
@@ -177,7 +197,7 @@ namespace StrftimeParser.Formatters
                         {
                             case 'r':
                                 // March
-                                if (CheckStringMatch(input, inputIndex, "march"))
+                                if (IsMatchIgnoringCase(input, inputIndex, "march".AsSpan()))
                                 {
                                     var result = input.Slice(inputIndex, 5);
                                     inputIndex += 5;
@@ -187,7 +207,7 @@ namespace StrftimeParser.Formatters
                                 break;
                             case 'y':
                                 // May
-                                if (CheckStringMatch(input, inputIndex, "may"))
+                                if (IsMatchIgnoringCase(input, inputIndex, "may".AsSpan()))
                                 {
                                     var result = input.Slice(inputIndex, 3);
                                     inputIndex += 3;
@@ -208,7 +228,7 @@ namespace StrftimeParser.Formatters
                         {
                             case 'p':
                                 // April
-                                if (CheckStringMatch(input, inputIndex, "april"))
+                                if (IsMatchIgnoringCase(input, inputIndex, "april".AsSpan()))
                                 {
                                     var result = input.Slice(inputIndex, 5);
                                     inputIndex += 5;
@@ -218,7 +238,7 @@ namespace StrftimeParser.Formatters
                                 break;
                             case 'u':
                                 // August
-                                if (CheckStringMatch(input, inputIndex, "august"))
+                                if (IsMatchIgnoringCase(input, inputIndex, "august".AsSpan()))
                                 {
                                     var result = input.Slice(inputIndex, 6);
                                     inputIndex += 6;
@@ -233,7 +253,7 @@ namespace StrftimeParser.Formatters
 
                 case 's':
                     // September
-                    if (CheckStringMatch(input, inputIndex, "september"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "september".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 9);
                         inputIndex += 9;
@@ -244,7 +264,7 @@ namespace StrftimeParser.Formatters
 
                 case 'o':
                     // October
-                    if (CheckStringMatch(input, inputIndex, "october"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "october".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 7);
                         inputIndex += 7;
@@ -255,7 +275,7 @@ namespace StrftimeParser.Formatters
 
                 case 'n':
                     // November
-                    if (CheckStringMatch(input, inputIndex, "november"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "november".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 8);
                         inputIndex += 8;
@@ -266,7 +286,7 @@ namespace StrftimeParser.Formatters
 
                 case 'd':
                     // December
-                    if (CheckStringMatch(input, inputIndex, "december"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "december".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 8);
                         inputIndex += 8;
@@ -278,7 +298,6 @@ namespace StrftimeParser.Formatters
 
             throw new FormatException("Unrecognized full month format for this locale");
         }
-
 
         public override DayOfWeek ParseDayOfWeekAbbreviated(ReadOnlySpan<char> input)
         {
@@ -313,7 +332,6 @@ namespace StrftimeParser.Formatters
 
             throw new ArgumentException("Unrecognized abbreviated day of week for this locale");
         }
-
 
         public override DayOfWeek ParseDayOfWeekFull(ReadOnlySpan<char> input)
         {
@@ -431,7 +449,6 @@ namespace StrftimeParser.Formatters
             throw new ArgumentException("Unrecognized full day of week for this locale");
         }
 
-
         public override ReadOnlySpan<char> ConsumeDayOfWeek(ref ReadOnlySpan<char> input, ref int inputIndex)
         {
             if (inputIndex >= input.Length)
@@ -443,7 +460,7 @@ namespace StrftimeParser.Formatters
             {
                 case 'm':
                     // Monday
-                    if (CheckStringMatch(input, inputIndex, "monday"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "monday".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 6);
                         inputIndex += 6;
@@ -459,7 +476,7 @@ namespace StrftimeParser.Formatters
                         if (secondChar == 'u')
                         {
                             // Tuesday
-                            if (CheckStringMatch(input, inputIndex, "tuesday"))
+                            if (IsMatchIgnoringCase(input, inputIndex, "tuesday".AsSpan()))
                             {
                                 var result = input.Slice(inputIndex, 7);
                                 inputIndex += 7;
@@ -469,7 +486,7 @@ namespace StrftimeParser.Formatters
                         else if (secondChar == 'h')
                         {
                             // Thursday
-                            if (CheckStringMatch(input, inputIndex, "thursday"))
+                            if (IsMatchIgnoringCase(input, inputIndex, "thursday".AsSpan()))
                             {
                                 var result = input.Slice(inputIndex, 8);
                                 inputIndex += 8;
@@ -482,7 +499,7 @@ namespace StrftimeParser.Formatters
 
                 case 'w':
                     // Wednesday
-                    if (CheckStringMatch(input, inputIndex, "wednesday"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "wednesday".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 9);
                         inputIndex += 9;
@@ -493,7 +510,7 @@ namespace StrftimeParser.Formatters
 
                 case 'f':
                     // Friday
-                    if (CheckStringMatch(input, inputIndex, "friday"))
+                    if (IsMatchIgnoringCase(input, inputIndex, "friday".AsSpan()))
                     {
                         var result = input.Slice(inputIndex, 6);
                         inputIndex += 6;
@@ -509,7 +526,7 @@ namespace StrftimeParser.Formatters
                         if (secondChar == 'a')
                         {
                             // Saturday
-                            if (CheckStringMatch(input, inputIndex, "saturday"))
+                            if (IsMatchIgnoringCase(input, inputIndex, "saturday".AsSpan()))
                             {
                                 var result = input.Slice(inputIndex, 8);
                                 inputIndex += 8;
@@ -519,7 +536,7 @@ namespace StrftimeParser.Formatters
                         else if (secondChar == 'u')
                         {
                             // Sunday
-                            if (CheckStringMatch(input, inputIndex, "sunday"))
+                            if (IsMatchIgnoringCase(input, inputIndex, "sunday".AsSpan()))
                             {
                                 var result = input.Slice(inputIndex, 6);
                                 inputIndex += 6;
