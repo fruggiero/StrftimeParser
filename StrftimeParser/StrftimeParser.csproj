@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <InternalsVisibleTo Include="StrftimeParser.Benchmark" />
+      <InternalsVisibleTo Include="StrftimeParserTest" />
     </ItemGroup>
 
     <ItemGroup>

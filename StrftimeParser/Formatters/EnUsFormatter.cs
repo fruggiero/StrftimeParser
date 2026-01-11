@@ -355,40 +355,25 @@ namespace StrftimeParser.Formatters
                     break;
 
                 case 't':
-                    if (input.Length == 7)
+                    switch (input.Length)
                     {
-                        char secondChar = (char)(input[1] | 0x20);
-                        if (secondChar == 'u')
-                        {
-                            // Tuesday
-                            if ((input[2] | 0x20) == 'e' &&
-                                (input[3] | 0x20) == 's' &&
-                                (input[4] | 0x20) == 'd' &&
-                                (input[5] | 0x20) == 'a' &&
-                                (input[6] | 0x20) == 'y')
-                                return DayOfWeek.Tuesday;
-                        }
-                        else if (secondChar == 'h')
-                        {
-                            // Thursday
-                            if ((input[2] | 0x20) == 'u' &&
-                                (input[3] | 0x20) == 'r' &&
-                                (input[4] | 0x20) == 's' &&
-                                (input[5] | 0x20) == 'd' &&
-                                (input[6] | 0x20) == 'a' &&
-                                (input[7] | 0x20) == 'y')
-                                return DayOfWeek.Thursday;
-                        }
-                    }
-                    else if (input.Length == 8 && (input[1] | 0x20) == 'h')
-                    {
+                        // Tuesday (7 chars)
+                        case 7 when
+                            (input[1] | 0x20) == 'u' &&
+                            (input[2] | 0x20) == 'e' &&
+                            (input[3] | 0x20) == 's' &&
+                            (input[4] | 0x20) == 'd' &&
+                            (input[5] | 0x20) == 'a' &&
+                            (input[6] | 0x20) == 'y':
+                            return DayOfWeek.Tuesday;
                         // Thursday (8 chars)
-                        if ((input[2] | 0x20) == 'u' &&
-                            (input[3] | 0x20) == 'r' &&
-                            (input[4] | 0x20) == 's' &&
-                            (input[5] | 0x20) == 'd' &&
-                            (input[6] | 0x20) == 'a' &&
-                            (input[7] | 0x20) == 'y')
+                        case 8 when (input[1] | 0x20) == 'h' &&
+                                    (input[2] | 0x20) == 'u' &&
+                                    (input[3] | 0x20) == 'r' &&
+                                    (input[4] | 0x20) == 's' &&
+                                    (input[5] | 0x20) == 'd' &&
+                                    (input[6] | 0x20) == 'a' &&
+                                    (input[7] | 0x20) == 'y':
                             return DayOfWeek.Thursday;
                     }
 

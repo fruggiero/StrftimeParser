@@ -47,7 +47,7 @@ namespace StrftimeParser
                                     builder.Append(formatter.ToStringSecond(dt));
                                     break;
                                 case 't':
-                                    builder.Append(formatter.ToStringTab(dt));
+                                    builder.Append(Formatter.ToStringTab(dt));
                                     break;
                                 case 'T':
                                     builder.Append(formatter.ToStringIsoTime(dt));
@@ -107,7 +107,7 @@ namespace StrftimeParser
                                     builder.Append(formatter.ToStringDayOfTheYear(dt));
                                     break;
                                 case 'w':
-                                    builder.Append(formatter.ToStringWeekDaySundayBased(dt));
+                                    builder.Append(Formatter.ToStringWeekDaySundayBased(dt));
                                     break;
                                 default:
                                     throw new FormatException($"Unrecognized format: %{format[formatIndex]}");

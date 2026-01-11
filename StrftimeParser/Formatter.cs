@@ -9,19 +9,39 @@ namespace StrftimeParser
     {
         protected abstract CultureInfo Culture { get; }
 
+        /// <summary>
+        /// Case-insensitive span comparison for POSIX strptime compatibility.
+        /// </summary>
+        protected static bool EqualsIgnoreCase(ReadOnlySpan<char> a, ReadOnlySpan<char> b)
+        {
+            if (a.Length != b.Length)
+                return false;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                if ((a[i] | 0x20) != (b[i] | 0x20))
+                {
+                    // Fallback for non-ASCII characters
+                    if (char.ToUpperInvariant(a[i]) != char.ToUpperInvariant(b[i]))
+                        return false;
+                }
+            }
+            return true;
+        }
+
         private static readonly ConcurrentDictionary<string, Formatter> FormatterCache = new()
         {
             [CultureInfo.InvariantCulture.Name] = new GenericFormatter(CultureInfo.InvariantCulture) // Predefined formatter for invariant culture
         };
         
-        private static readonly Lazy<EnUsFormatter> _enUsLazyInstance = new(() => new EnUsFormatter());
+        private static readonly Lazy<EnUsFormatter> EnUsLazyInstance = new(() => new EnUsFormatter());
 
         public static Formatter For(CultureInfo culture)
         {
             if (culture == null) throw new ArgumentNullException(nameof(culture));
             return culture.Name switch
             {
-                "en-US" => _enUsLazyInstance.Value,
+                "en-US" => EnUsLazyInstance.Value,
                 // Fallback to generic formatter for other cultures (slower)
                 _ => FormatterCache.GetOrAdd(culture.Name, _ => new GenericFormatter(culture))
             };
@@ -35,7 +55,7 @@ namespace StrftimeParser
                     continue;
 
                 var inputSlice = input.Slice(inputIndex, dayName.Length);
-                if (!inputSlice.SequenceEqual(dayName.AsSpan()))
+                if (!EqualsIgnoreCase(inputSlice, dayName.AsSpan()))
                     continue;
 
                 var result = inputSlice;
@@ -54,7 +74,7 @@ namespace StrftimeParser
                     continue;
 
                 var inputSlice = input.Slice(inputIndex, abbreviatedDayName.Length);
-                if (!inputSlice.SequenceEqual(abbreviatedDayName.AsSpan()))
+                if (!EqualsIgnoreCase(inputSlice, abbreviatedDayName.AsSpan()))
                     continue;
 
                 var result = inputSlice;
@@ -73,7 +93,7 @@ namespace StrftimeParser
                     continue;
 
                 var inputSlice = input.Slice(inputIndex, abbreviatedMonth.Length);
-                if (!inputSlice.SequenceEqual(abbreviatedMonth.AsSpan()))
+                if (!EqualsIgnoreCase(inputSlice, abbreviatedMonth.AsSpan()))
                     continue;
 
                 var result = inputSlice;
@@ -93,7 +113,7 @@ namespace StrftimeParser
                     continue;
 
                 var inputSlice = input.Slice(inputIndex, month.Length);
-                if (!inputSlice.SequenceEqual(month.AsSpan()))
+                if (!EqualsIgnoreCase(inputSlice, month.AsSpan()))
                     continue;
 
                 var result = inputSlice;
@@ -115,7 +135,7 @@ namespace StrftimeParser
         {
             for (int i = 0; i < Culture.DateTimeFormat.MonthNames.Length; i++)
             {
-                if (input.SequenceEqual(Culture.DateTimeFormat.MonthNames[i].AsSpan()))
+                if (EqualsIgnoreCase(input, Culture.DateTimeFormat.MonthNames[i].AsSpan()))
                     return i + 1;
             }
             throw new FormatException("Invalid month for this culture");
@@ -125,7 +145,7 @@ namespace StrftimeParser
         {
             for (int i = 0; i < Culture.DateTimeFormat.AbbreviatedMonthNames.Length; i++)
             {
-                if (input.SequenceEqual(Culture.DateTimeFormat.AbbreviatedMonthNames[i].AsSpan()))
+                if (EqualsIgnoreCase(input, Culture.DateTimeFormat.AbbreviatedMonthNames[i].AsSpan()))
                     return i + 1;
             }
             throw new FormatException("Invalid abbreviated month for this culture");
@@ -135,7 +155,7 @@ namespace StrftimeParser
         {
             for (int i = 0; i < Culture.DateTimeFormat.AbbreviatedDayNames.Length; i++)
             {
-                if (input.SequenceEqual(Culture.DateTimeFormat.AbbreviatedDayNames[i].AsSpan()))
+                if (EqualsIgnoreCase(input, Culture.DateTimeFormat.AbbreviatedDayNames[i].AsSpan()))
                     return (DayOfWeek)i;
             }
             throw new FormatException("Invalid abbreviated day of week for this culture");
@@ -145,7 +165,7 @@ namespace StrftimeParser
         {
             for (int i = 0; i < Culture.DateTimeFormat.DayNames.Length; i++)
             {
-                if (input.SequenceEqual(Culture.DateTimeFormat.DayNames[i].AsSpan()))
+                if (EqualsIgnoreCase(input, Culture.DateTimeFormat.DayNames[i].AsSpan()))
                     return (DayOfWeek)i;
             }
             throw new FormatException("Invalid day of week for this culture");
@@ -153,40 +173,15 @@ namespace StrftimeParser
         
         public DateTime ToDayOfWeek(DateTime source, DayOfWeek dayOfWeek)
         {
-            var now = source;
-            var firstDayOfWeek = Culture.DateTimeFormat.FirstDayOfWeek;
-            while (now.DayOfWeek != firstDayOfWeek) now = now.AddDays(-1);
-            while (now.DayOfWeek != dayOfWeek) now = now.AddDays(1);
-            return now;
-        }
-
-        public static DateTime ToMonth(DateTime source, int month)
-        {
-            var now = source;
-            while (now.Month != 1)
-            {
-                now = now.AddMonths(-1);
-            }
-            while (now.Month != month)
-            {
-                now = now.AddMonths(1);
-            }
-
-            return now;
-        }
-
-        public static DateTime ToDayOfTheMonth(DateTime source, int dayOfTheMonthNumber)
-        {
-            var now = source;
-            if (now.Day < dayOfTheMonthNumber)
-            {
-                now = now.AddDays(dayOfTheMonthNumber - now.Day);
-            }
-            else if (now.Day > dayOfTheMonthNumber)
-            {
-                now = now.AddDays(-(now.Day - dayOfTheMonthNumber));
-            }
-            return now;
+            int currentDay = (int)source.DayOfWeek;
+            int targetDay = (int)dayOfWeek;
+            int firstDay = (int)Culture.DateTimeFormat.FirstDayOfWeek;
+    
+            // Calculate offset from first day of week for both current and target
+            int currentOffset = (currentDay - firstDay + 7) % 7;
+            int targetOffset = (targetDay - firstDay + 7) % 7;
+    
+            return source.AddDays(targetOffset - currentOffset);
         }
 
         public static ReadOnlySpan<char> ConsumeHour24(ref ReadOnlySpan<char> input, ref int inputIndex)
@@ -663,7 +658,7 @@ namespace StrftimeParser
             return dt.ToString("ss", Culture);
         }
 
-        public string ToStringTab(DateTime _)
+        public static string ToStringTab(DateTime _)
         {
             return "\t";
         }
@@ -688,7 +683,7 @@ namespace StrftimeParser
             };
         }
 
-        public static string ToStringNewLine(DateTime dt)
+        public static string ToStringNewLine(DateTime _)
         {
             return "\n";
         }
@@ -778,7 +773,7 @@ namespace StrftimeParser
             return dt.DayOfYear.ToString(Culture).PadLeft(3, '0');
         }
 
-        public string ToStringWeekDaySundayBased(DateTime dt)
+        public static string ToStringWeekDaySundayBased(DateTime dt)
         {
             return dt.DayOfWeek switch
             {
