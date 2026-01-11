@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using FluentAssertions;
 using StrftimeParser;
@@ -10,36 +11,53 @@ namespace StrftimeParserTest
     {
         private readonly CultureInfo _culture = new("en-US");
 
+        public static IEnumerable<object[]> FormatTestData =>
+            new List<object[]>
+            {
+                new object[] { "%Y", "1970" },
+                new object[] { "%y", "70" },
+                new object[] { "%S", "05" },
+                new object[] { "%t", "\t" },
+                new object[] { "%T", "03:04:05" },
+                new object[] { "%u", "5" },
+                new object[] { "%n", "\n" },
+                new object[] { "%m", "01" },
+                new object[] { "%M", "04" },
+                new object[] { "%I", "03" },
+                new object[] { "%p", "AM" },
+                new object[] { "%H", "03" },
+                new object[] { "%B", "January" },
+                new object[] { "%b", "Jan" },
+                new object[] { "%C", "19" },
+                new object[] { "%c", "Fri Jan 02 03:04:05 1970" },
+                new object[] { "%a", "Fri" },
+                new object[] { "%A", "Friday" },
+                new object[] { "%d", "02" },
+                new object[] { "%e", " 2" },
+                new object[] { "%D", "01/02/70" },
+                new object[] { "%F", "1970-01-02" },
+                new object[] { "%j", "002" },
+                new object[] { "%w", "5" }
+            };
+
         [Theory]
-        [InlineData("%Y", "1970")]
-        [InlineData("%y", "70")]
-        [InlineData("%S", "05")]
-        [InlineData("%t", "\t")]
-        [InlineData("%T", "03:04:05")]
-        [InlineData("%u", "5")]
-        [InlineData("%n", "\n")]
-        [InlineData("%m", "01")]
-        [InlineData("%M", "04")]
-        [InlineData("%I", "03")]
-        [InlineData("%p", "AM")]
-        [InlineData("%H", "03")]
-        [InlineData("%B", "January")]
-        [InlineData("%b", "Jan")]
-        [InlineData("%C", "19")]
-        [InlineData("%c", "Fri Jan 02 03:04:05 1970")]
-        [InlineData("%a", "Fri")]
-        [InlineData("%A", "Friday")]
-        [InlineData("%d", "02")]
-        [InlineData("%e", " 2")]
-        [InlineData("%D", "01/02/70")]
-        [InlineData("%F", "1970-01-02")]
-        [InlineData("%j", "002")]
-        [InlineData("%w", "5")]
+        [MemberData(nameof(FormatTestData))]
         public void Should_ConvertToString(string format, string expectedResult)
         {
             var dt = new DateTime(1970, 1, 2, 3, 4, 5);
 
             var res = Strftime.ToString(dt, format, _culture);
+
+            res.Should().Be(expectedResult);
+        }
+        
+        [Theory]
+        [MemberData(nameof(FormatTestData))]
+        public void Should_ConvertToString_UsingExtensionMethod(string format, string expectedResult)
+        {
+            var dt = new DateTime(1970, 1, 2, 3, 4, 5);
+
+            var res = dt.ToStrftimeString(format, _culture);
 
             res.Should().Be(expectedResult);
         }
