@@ -6,7 +6,7 @@ The project provides a main class called `Strftime` that exposes a static method
 
 The `Parse` method is the equivalent of the `strptime` in `time.h` of C language, as it allows to obtain a DateTime object given a format specifier and a formatted date string.
 
-The `ToString` method is the equivalent of the `strftime` in `time.h` of C language, as it allows to obtain a formatted date string, given a format specifier and a DateTime object
+The `ToString` method is the equivalent of the `strftime` in `time.h` of C language, as it allows to obtain a formatted date string, given a format specifier and a DateTime object.
 
 ## Usage
 
@@ -59,11 +59,34 @@ DateTime dateTime = Strftime.Parse(strftimeString, formatSpecifier, CultureInfo.
 
 ## How to use a specified CultureInfo when converting to string
 
-To execute the parsing with a specific Culture, you can pass
+To execute the formatting with a specific Culture, you can pass
 a CultureInfo instance to the `ToString` method:
 
 ```
 var result = Strftime.ToString(dt, formatSpecifier, CultureInfo.GetCultureInfo("it-IT"));
+
+// result now contains the formatted string
+```
+
+### Alternative: Using the `ToStrftimeString` extension method
+
+As an alternative to the static `Strftime.ToString()` method, you can use the `ToStrftimeString()` extension method directly on `DateTime` objects for a more fluent and object-oriented API:
+
+```
+using StrftimeParser;
+
+var dt = new DateTime(1970, 1, 2, 3, 4, 5);
+var format = "%c";
+
+var result = dt.ToStrftimeString(format);
+
+// result now contains the formatted string
+```
+
+You can also specify a culture:
+
+```
+var result = dt.ToStrftimeString(formatSpecifier, CultureInfo.GetCultureInfo("it-IT"));
 
 // result now contains the formatted string
 ```
