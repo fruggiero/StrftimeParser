@@ -42,6 +42,10 @@ jobs:
           
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
   
       - name: Run './build.sh Compile Test Pack' 
         run: ./build.sh Compile Test Pack
@@ -78,6 +82,11 @@ jobs:
           
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
 
       - name: Download a Build Artifact
         uses: actions/download-artifact@v8
